@@ -1,0 +1,466 @@
+{% load  staticfiles %}
+<html>
+  <head>
+    <title>运营分析可视化平台</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <meta name="description" content="Blue Moon - Responsive Admin Dashboard" />
+    <meta name="keywords" content="数据，分析数据，数据可视化，图表分析" />
+    <meta name="author" content="hefang&liufutao" />
+    <link href="{% static 'img/favicon.ico' %}" rel="shortcut icon" >
+    <link href="{% static 'blue-moon/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'blue-moon/css/new.css' %}" rel="stylesheet">
+
+    <!-- Datepicker CSS -->
+    <link rel="stylesheet" type="text/css" href="{% static 'blue-moon/css/datepicker.css' %}">
+
+    <link href="{% static 'blue-moon/fonts/font-awesome.min.css' %}" rel="stylesheet">
+
+    <!-- HTML5 shiv and Respond.js IE8 support of HTML5 elements and media queries -->
+
+  </head>
+
+  <body>
+
+    <!-- Header Start -->
+    <header>
+
+      <h2 style="color:#fff;width:600px;float:left;font-family: 'Microsoft YaHei';margin: 7px 0 0 0;line-height: 50px"><img src="{% static 'images/MTV.png' %}"/><span style="margin-left:5px;vertical-align: bottom">运营分析可视化平台</span></h2>
+      
+    </header>
+    <!-- Header End -->
+
+    <!-- Main Container start -->
+    <div class="dashboard-container">
+
+      <div class="container">
+        <!-- Top Nav Start -->
+        <div id='cssmenu'>
+          <ul>
+            <li class='active'>
+              <a href='/display/'>
+                <i class="fa fa-dashboard"></i>
+                <span >全平台</span>
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                <i class="fa fa-bar-chart-o"></i>频道</a>
+              <ul>
+                 <li><a href="/display/channel?name=show">综艺</a></li>
+                 <li><a href="/display/channel?name=tv">电视剧</a></li>
+                 <li><a href="/display/channel?name=movie">电影</a></li>
+                 <li><a href="/display/channel?name=cartoon">动漫</a></li>
+              </ul>
+            </li>
+            <li class=''>
+              <a href='#'><i class="fa fa-caret-square-o-right"></i>节目</a>
+              <!--<ul>-->
+                 <!--<li><a href='flot.html'>Flot Graphs</a></li>-->
+                 <!--<li><a href='graphs.html'>Google Graph</a></li>-->
+                 <!--<li><a href='vector-maps.html'>Vector Maps</a></li>-->
+              <!--</ul>-->
+            </li>
+
+          </ul>
+        </div>
+
+        <!-- Top Nav End -->
+
+
+
+        <!-- Sub Nav End -->
+
+        <!-- Dashboard Wrapper Start -->
+        <div class="dashboard-wrapper-lg">
+          <div class="widget">
+            <div class="wedger-header-blue">
+
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                  <div style="font-size: 24px;font-weight: bold;margin:0 -15px;color:#000;" >
+                    每日概况
+                    <span class="mini-title" style="font-size: 15px;color:#000;">
+                      {{date_str.0}}
+                    </span>
+                  </div>
+                </div>
+			
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                  <form class="form-inline" action="/display/"  method="post" role="form">
+                    {% csrf_token %}
+                    <div class="form-group">
+                      <label for="search_date" style="font-size: 14px">日期：</label>
+                      <input type="date" class="form-control" id="search_date" name="search_date" placeholder="开始时间">
+                    </div>
+                                        <button type="submit" class="btn btn-default">查询</button>
+                  </form>
+                </div>
+
+            </div>
+            <div class="widget-body widget-body-special">
+              <div class="row row-special">
+                <div class="col-lg-2 col-md-2 col-sm-6" >
+		    <div class="mini-widget" data-tip="截止当日的当季日均VV值/目标值">
+                  	<div id="header_one" style="height:150px;"></div>
+		    </div>
+                </div>
+                <div class="col-lg-2 col-md-2  col-sm-6">
+                  <div class="mini-widget" data-tip='当日的播放次数，同比为上周同日，环比为前日'>
+		    <span class="line line-top"></span>
+                    <span class="line line-left"></span>
+                    <span class="line line-right"></span>
+                    <span class="line line-bottom"></span>
+                    <div class="mini-widget-heading clearfix">
+                      <div class="text-center">VV</div>
+                    </div>
+                    <div class="mini-widget-body clearfix">
+                      <div class="pull-left">
+                        <i class="fa fa-play-circle-o"></i>
+                      </div>
+                      <div class="pull-right number">{{overview_platform_day_dict.vv.0}}万</div>
+                    </div>
+                    <div class="mini-widget-footer clearfix">
+                      <div class="pull-left"><span style="margin-right: 10px">环比</span><i class="fa fa-arrow"></i> <i>{{overview_platform_day_dict.vv.1}}%</i></div>
+                      <div class="pull-right"><span style="margin-right: 10px">同比</span><i class="fa fa-arrow"></i></i><i>{{overview_platform_day_dict.vv.2}}%</i></div>
+                    </div>
+                    <!--                 <div class="mini-widget-footer center-align-text">
+                                      <span>Better than last week</span>
+                                    </div> -->
+                  </div>
+                </div>
+                <div class="col-lg-2 col-md-2 col-sm-6">
+                  <div class="mini-widget" data-tip="当日的去重播放用户数，同比为上周同日，环比为前日">
+		    <span class="line line-top"></span>
+                    <span class="line line-left"></span>
+                    <span class="line line-right"></span>
+                    <span class="line line-bottom"></span>
+                    <div class="mini-widget-heading clearfix">
+                      <div class="text-center">UV</div>
+                    </div>
+                    <div class="mini-widget-body clearfix">
+                      <div class="pull-left">
+                        <i class="fa fa-users"></i>
+                      </div>
+                      <div class="pull-right number">{{overview_platform_day_dict.uv.0}}万</div>
+                    </div>
+                    <div class="mini-widget-footer clearfix">
+                      <div class="pull-left"><span style="margin-right: 10px">环比</span><i class="fa fa-arrow"></i> <i>{{overview_platform_day_dict.uv.1}}%</i></div>
+                      <div class="pull-right"><span style="margin-right: 10px">同比</span><i class="fa fa-arrow"></i><i>{{overview_platform_day_dict.uv.2}}%</i></div>
+                    </div>
+                    <!--                 <div class="mini-widget-footer center-align-text">
+                                      <span>Better than last week</span>
+                                    </div> -->
+                  </div>
+                </div>
+                <div class="col-lg-2 col-md-2 col-sm-6">
+                  <div class="mini-widget" data-tip="当日的页面访问次数">
+		    <span class="line line-top"></span>
+                    <span class="line line-left"></span>
+                    <span class="line line-right"></span>
+                    <span class="line line-bottom"></span>
+                    <div class="mini-widget-heading clearfix">
+                      <div class="text-center">PV</div>
+                    </div>
+                    <div class="mini-widget-body clearfix">
+                      <div class="pull-left">
+                        <i class="fa fa-desktop"></i>
+                      </div>
+                      <div class="pull-right number">{{overview_platform_day_dict.pv.0}}万</div>
+                    </div>
+                    <div class="mini-widget-footer clearfix">
+                      <div class="pull-left"><span style="margin-right: 10px">环比</span><i class="fa fa-arrow"></i><i>{{overview_platform_day_dict.pv.1}}%</i></div>
+                      <div class="pull-right"><span style="margin-right: 10px">同比</span><i class="fa fa-arrow"></i><i>{{overview_platform_day_dict.pv.2}}%</i></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-2 col-md-2 col-sm-6">
+                  <div class="mini-widget" data-tip="当日的VV/UV">
+		    <span class="line line-top"></span>
+                    <span class="line line-left"></span>
+                    <span class="line line-right"></span>
+                    <span class="line line-bottom"></span>
+                    <div class="mini-widget-heading clearfix">
+                      <div class="text-center">人均播放次数</div>
+                    </div>
+                    <div class="mini-widget-body clearfix">
+                      <div class="pull-left">
+                        <i class="fa fa-user-plus"></i>
+                      </div>
+                      <div class="pull-right number">{{overview_platform_day_dict.vv_perperson.0}}次</div>
+                    </div>
+                    <div class="mini-widget-footer clearfix">
+                      <div class="pull-left"><span style="margin-right: 10px">环比</span><i class="fa fa-arrow"></i><i>{{overview_platform_day_dict.vv_perperson.1}}%</i></div>
+                      <div class="pull-right"><span style="margin-right: 10px">同比</span><i class="fa fa-arrow"></i><i>{{overview_platform_day_dict.vv_perperson.2}}%</i></div>
+                    </div>
+                    <!--                 <div class="mini-widget-footer center-align-text">
+                                      <span>Better than last week</span>
+                                    </div> -->
+                  </div>
+                </div>
+                <div class="col-lg-2 col-md-2 col-sm-6">
+                  <div class="mini-widget" data-tip="当日总播放时长/UV">
+		    <span class="line line-top"></span>
+                    <span class="line line-left"></span>
+                    <span class="line line-right"></span>
+                    <span class="line line-bottom"></span>
+                    <div class="mini-widget-heading clearfix">
+                      <div class="text-center">人均播放时长</div>
+                    </div>
+                    <div class="mini-widget-body clearfix">
+                      <div class="pull-left">
+                        <i class="fa fa-clock-o"></i>
+                      </div>
+                      <div class="pull-right number">{{overview_platform_day_dict.duration_perperson.0}}分钟</div>
+                    </div>
+                    <div class="mini-widget-footer clearfix">
+                      <div class="pull-left"><span style="margin-right: 10px">环比</span><i class="fa fa-arrow"></i><i>{{overview_platform_day_dict.duration_perperson.1}}%</i></div>
+                      <div class="pull-right"><span style="margin-right: 10px">同比</span><i class="fa fa-arrow"></i><i>{{overview_platform_day_dict.duration_perperson.2}}%</i></div>
+                    </div>
+                    <!--                 <div class="mini-widget-footer center-align-text">
+                                      <span>Better than last week</span>
+                                    </div> -->
+                  </div>
+                </div>
+
+              </div>
+            </div>
+	</div>
+          <!-- Row starts -->
+
+          <!-- Row ends -->
+
+          <!-- Row Start -->
+          <div class="widget">
+            <div class="wedger-header-blue">
+              <div style="font-size: 24px;font-weight: bold;color:#000;">
+                平台趋势
+              </div>
+            </div>
+            <div class="widget-body">
+              <div class="row">
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                  <div class="widget">
+                    <div class="widget-header">
+                      <div class="title">
+                        月VV趋势
+                    <span class="mini-title">
+                    </span>
+                      </div>
+                    </div>
+                    <div class="widget-body">
+                      <div id="platform_vv_month" style="position: relative;height: 300px;"></div>
+                    </div>
+                  </div>
+
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                  <div class="widget">
+                    <div class="widget-header">
+                      <div class="title">
+                        日VV-UV趋势
+                    <span class="mini-title">
+                    </span>
+                      </div>
+                    </div>
+                    <div class="widget-body">
+                      <div id="platform_vv_uv_day" style="height: 300px"></div>
+                    </div>
+                  </div>
+
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+
+
+          <!-- Row Start -->
+          <div class="widget">
+            <div class="wedger-header-blue">
+              <div style="font-size: 24px;font-weight: bold;color:#000;">
+                趋势分析
+              </div>
+            </div>
+            <div class="widget-body">
+              <div class="row">
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                  <div class="widget">
+                    <div class="widget-header">
+                      <div class="title">
+                        分端VV趋势
+                    <span class="mini-title">
+                    </span>
+                      </div>
+                    </div>
+                    <div class="widget-body">
+                      <div id="platform_vv_terminal_day" style="height: 300px"></div>
+                    </div>
+                  </div>
+
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                  <div class="widget">
+                    <div class="widget-header">
+                      <div class="title">
+                        分端UV趋势
+                    <span class="mini-title">
+                    </span>
+                      </div>
+                    </div>
+                    <div class="widget-body">
+                      <div id="platform_uv_terminal_day" style="height: 300px"></div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                  <div class="widget">
+                    <div class="widget-header">
+                      <div class="title">
+                        分频道VV趋势
+                    <span class="mini-title">
+                    </span>
+                      </div>
+                    </div>
+                    <div class="widget-body">
+                      <div id="platform_vv_channel_day" style="height: 300px"></div>
+                    </div>
+                  </div>
+
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                  <div class="widget">
+                    <div class="widget-header">
+                      <div class="title">
+                        分频道UV趋势
+                    <span class="mini-title">
+                    </span>
+                      </div>
+                    </div>
+                    <div class="widget-body">
+                      <div id="platform_uv_channel_day" style="height: 300px"></div>
+                    </div>
+                  </div>
+
+                </div>
+              <!-- Row End -->
+              <br/>
+              <!-- Row Start -->
+
+            </div>
+
+              <!-- Row End -->
+              <br/>
+          </div>
+
+
+
+        </div>
+        <!-- Dashboard Wrapper End -->
+          <div class="widget">
+            <div class="wedger-header-blue">
+              <div style="font-size: 24px;font-weight: bold;color:#000;">
+                运营分析
+              </div>
+            </div>
+            <div class="widget-body">
+              <div class="row">
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                  <div class="widget">
+                    <div class="widget-header">
+                      <div class="title">
+                        DAU、UV占比
+                      <span class="mini-title">
+                      </span>
+                      </div>
+                    </div>
+                    <div class="widget-body">
+                      <div id="platform_dau_day" style="height: 600px"></div>
+                    </div>
+                  </div>
+
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                  <div class="widget">
+                    <div class="widget-header">
+                      <div class="title">
+                        上周重点节目(日均VV、日均UV、日均VV/UV)
+                        <span class="mini-title" style="font-size: 15px;color:#000;">
+                          {{date_str.1}}
+                        </span>
+                      </div>
+                    </div>
+                    <div class="widget-body">
+                      <div id="platform_vv_uv_program" style="height: 600px"></div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        <footer>
+          <div style="text-align:center"><p>© MGTV hf ltt</p></div>
+        </footer>
+
+      </div>
+    </div>
+    <!-- Main Container end -->
+      <script>
+        //kpi
+        var kpi_ratio = {{kpi_ratio}}
+        //platform_vv_month
+        var vv_month_date = {{ vv_month_date|safe }};
+        var vv_month_lastyear = {{ vv_month_lastyear|safe }};
+        var vv_month_thisyear = {{ vv_month_thisyear|safe }};
+        //platform_vv_uv_day
+        var vv_day_date = {{ vv_day_date|safe }};
+        var vv_day_data = {{ vv_day_data|safe }};
+        var uv_day_data = {{ uv_day_data|safe }};
+        var vv_day_perperson = {{ vv_day_perperson|safe }};
+        //platform_uv_terminal_day
+
+        var uv_terminal_day_dict = {{ uv_terminal_day_dict|safe }};
+
+        //platform_vv_terminal_day
+
+        var vv_terminal_day_dict = {{ vv_terminal_day_dict|safe }};
+
+        //platform_vv_channel_day
+        var vv_channel_day_dict = {{ vv_channel_day_dict|safe }};
+        //platform_uv_channel_day
+        var uv_channel_day_dict = {{ uv_channel_day_dict|safe }};
+
+        //platform_dau_day
+
+        var dau_day_data = {{ dau_day_data|safe }};
+        var uv_ration_day_data = {{ uv_ration_day_data|safe }};
+
+        //platform_vv_uv_program
+        var pid_day_avg_result_list = {{ pid_day_avg_result|safe }};
+
+      </script>
+      <script src="{% static 'js/jquery.js' %}"></script>
+      <script src="{% static 'js/bootstrap.min.js' %}"></script>
+      <script src="{% static 'js/jquery.scrollUp.js' %}"></script>
+      <script src="{% static 'js/main.js' %}"></script>
+
+      <!--ECharts -->
+      <script src="{% static 'js/echarts.min.js' %}"></script>
+      <script src="{% static 'js/firstMap.js' %}"></script>
+      <script src="{% static 'js/platform_vv_month.js' %}"></script>
+      <script src="{% static 'js/platform_vv_uv_day.js' %}"></script>
+      <script src="{% static 'js/platform_vv_terminal_day.js' %}"></script>
+      <script src="{% static 'js/platform_uv_terminal_day.js' %}"></script>
+      <script src="{% static 'js/platform_vv_channel_day.js' %}"></script>
+      <script src="{% static 'js/platform_uv_channel_day.js' %}"></script>
+      <script src="{% static 'js/platform_dau_day.js' %}"></script>
+      <script src="{% static 'js/platform_vv_uv_program.js' %}"></script>
+
+
+  </body>
+</html>
