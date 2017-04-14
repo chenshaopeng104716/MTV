@@ -3,6 +3,7 @@
 import psycopg2
 import MySQLdb
 import datetime
+import pandas as pd
 import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -53,15 +54,8 @@ class Newmofang(object):
             print ("新魔方数据库无法连接")
             self.conn = None
             self.cursor = None
-        if "start_date" in kwargs:
-            self.start_date = kwargs['start_date']
-        if "end_date" in kwargs:
-            self.end_date = kwargs['end_date']
-        if "searchtype" in kwargs:
-            self.searchtype = kwargs['searchtype']###查询模块
-            self.table = self.search_dict[self.searchtype]  ###返回查询的数据对应的表
-        if "pid_str" in kwargs:
-            self.pid_str = kwargs['pid_str']
+        for k,v in kwargs.iteritems():
+            setattr(self,k,v)
         if "channel_name" in kwargs:###查询具体频道时要把频道名称传进来
             self.channel_cid = self.newmofang_cid_dict[kwargs['channel_name']]
 
@@ -71,37 +65,44 @@ class Newmofang(object):
                            'sql':'select a.id as pid,a.title as pid_title,b.classcn as bid_title from hunantv_v_collection a,hunantv_v_class b where a.rootid = b.id and a.id in (%s);'},
                     'ott':{'host': "10.100.1.70", 'user': "app_hefang", 'passwd': "app_hefang1234", 'db': "tv",'charset': "utf8",
                            'sql':'select a.id as pid,a.`desc` as pid_title,b.`desc` as bid_title from sndlvl a,fstlvl b where a.fstlvl_id=b.id and a.id in (%s);'},}
-        cms_list = []
         for terminal in cms_dict.keys():
             conn = MySQLdb.connect(host=cms_dict[terminal]['host'],user=cms_dict[terminal]['user'],passwd=cms_dict[terminal]['passwd'],db=cms_dict[terminal]['db'],charset=cms_dict[terminal]['charset'])
-            cursor = conn.cursor()
             sql = cms_dict[terminal]['sql'] % self.pid_str
-            cursor.execute(sql)
-            result = cursor.fetchall()
-            conn.commit()
+            if terminal == 'mpp':###不同的媒资合集命名
+                mpp_result = pd.read_sql(sql,conn)
+            elif terminal == 'ott':
+                ott_result = pd.read_sql(sql,conn)
             conn.close()
-            cms_list.extend(result)
-        return set(cms_list)###合集去重
+        cms_result = pd.concat([mpp_result,ott_result])
+        return cms_result###合集去重
 
     ###按照查询模块调取具体函数
-    def func(self):
-        return self.func_dict.get(self.searchtype)
+    def func(self,searchtype):
+        return self.func_dict.get(searchtype)
 
     ###模块查询
-    def sql_query(self):###具体查询，返回结果
+    def sql_query(self,sql_all):###具体查询，返回结果
         if self.conn != None:###判断数据库连接是否正常
-            sql = self.func()()
-            print sql
-            self.cursor.execute(sql)
-            result = self.cursor.fetchall()
-            self.conn.commit()
+            print sql_all
+            result = pd.read_sql(sql_all,self.conn)
             self.conn.close()
             # print self.table
         else:
             result = None
         return result
 
-    def platform_kpi(self):
+    ###所有查询汇总在一起union all
+    @staticmethod
+    def sql_union(*args):
+        sql_all = ' union all '.join(args)
+        return sql_all
+
+    def module_search(self,searchtype):###根据模块查询返回具体的sql
+        table = self.search_dict[searchtype]
+        module = self.func(searchtype)
+        return module(table)
+
+    def platform_kpi(self,table):
         ###每个月对应的季度
         quarter = {1:1,2:1,3:1,4:2,5:2,6:2,7:3,8:3,9:3,10:4,11:4,12:4}
         ###查询日期的年份
@@ -112,11 +113,11 @@ class Newmofang(object):
         quarter_now = quarter[(datetime.datetime.strptime(self.end_date, "%Y%m%d")).month]
         calculate_start_time = quarter_start_date[quarter_now]
         calculate_end_time = self.end_date###查询结束时间
-        sql = "select avg(a.vv) as vv from (select date,sum(vv) as vv from {table} where {bid_not_in} " \
-              "and date>='{start_time}' and date<='{end_time}' GROUP BY date) a;".format(table=self.table,start_time=calculate_start_time,end_time=calculate_end_time,bid_not_in=self.bid_not_in)
+        sql = "(select max(date) as col1,'null' as col2,'null' as col3,'null' as col4,'null' as col5,round(avg(a.vv)/10000) as num,'platform_kpi' as module_name from (select date,sum(vv) as vv from {table} where {bid_not_in} " \
+              "and date>='{start_time}' and date<='{end_time}' GROUP BY date) a)".format(table=table,start_time=calculate_start_time,end_time=calculate_end_time,bid_not_in=self.bid_not_in)
         return sql
 
-    def channel_kpi(self):
+    def channel_kpi(self,table):
         ###每个月对应的季度
         quarter = {1:1,2:1,3:1,4:2,5:2,6:2,7:3,8:3,9:3,10:4,11:4,12:4}
         ###查询日期的年份
@@ -127,119 +128,124 @@ class Newmofang(object):
         quarter_now = quarter[(datetime.datetime.strptime(self.end_date, "%Y%m%d")).month]
         calculate_start_time = quarter_start_date[quarter_now]
         calculate_end_time = self.end_date###查询结束时间
-        sql = "select avg(a.vv) as vv from (select date,sum(vv) as vv from {table} where {bid_not_in} and cid in ({channel_cid}) " \
-              "and date>='{start_time}' and date<='{end_time}' GROUP BY date) a;".format(table=self.table,start_time=calculate_start_time,end_time=calculate_end_time,bid_not_in=self.bid_not_in,channel_cid=self.channel_cid)
+        sql = "(select max(date) as col1,'null' as col2,'null' as col3,'null' as col4,'null' as col5,round(avg(a.vv)/10000,1) as num,'channel_kpi' as module_name from " \
+              "(select date,sum(vv) as vv from {table} where {bid_not_in} and cid in ({channel_cid}) " \
+              "and date>='{start_time}' and date<='{end_time}' GROUP BY date) a)".format(table=table,start_time=calculate_start_time,end_time=calculate_end_time,bid_not_in=self.bid_not_in,channel_cid=self.channel_cid)
         return sql
 
-    def platform_vv_month(self):###全平台月vv汇总模块
-        sql = "select substring(date from 1 for 6) as date,sum(vv) as vv from {table} where date>='20160101' and date<='{end_date}' and {bid_not_in} " \
-              "GROUP BY substring(date from 1 for 6) order by substring(date from 1 for 6)".format(table=self.table,end_date=self.end_date,bid_not_in=self.bid_not_in)
+    def platform_vv_month(self,table):###全平台月vv汇总模块
+        sql = "(select cast(substring(date from 1 for 6) as integer) as col1,'null' as col2,'null' as col3,'null' as col4,'null' as col5,round(sum(vv)/10000,1) as num," \
+              "'platform_vv_month' as module_name from {table} where date>='20160101' and date<='{end_date}' and {bid_not_in} " \
+              "GROUP BY substring(date from 1 for 6) order by substring(date from 1 for 6))".format(table=table,end_date=self.end_date,bid_not_in=self.bid_not_in)
         return sql
 
-    def channel_vv_month(self):
-        sql = "select substring(date from 1 for 6) as date,sum(vv) as vv from {table} where date>='20160101' and date<='{end_date}' and {bid_not_in} and cid in ({channel_cid}) " \
-              "GROUP BY substring(date from 1 for 6) order by substring(date from 1 for 6)".format(table=self.table,end_date=self.end_date,bid_not_in=self.bid_not_in,channel_cid=self.channel_cid)
+    def channel_vv_month(self,table):
+        sql = "(select cast(substring(date from 1 for 6) as integer) as col1,'null' as col2,'null' as col3,'null' as col4,'null' as col5,round(sum(vv)/10000,1) as num,'channel_vv_month' as module_name " \
+              "from {table} where date>='20160101' and date<='{end_date}' and {bid_not_in} and cid in ({channel_cid}) " \
+              "GROUP BY substring(date from 1 for 6) order by substring(date from 1 for 6))".format(table=table,end_date=self.end_date,bid_not_in=self.bid_not_in,channel_cid=self.channel_cid)
         return sql
 
-    def platform_vv_day(self):###全平台每日vv
-        sql = "select date,sum(vv) as vv from {table} where {bid_not_in} and date>='{start_time}' and date<='{end_time}' group by date order by date".format(table=self.table,start_time=self.start_date,end_time=self.end_date,bid_not_in=self.bid_not_in)
+    def platform_vv_day(self,table):###全平台每日vv
+        sql = "(select date as col1,'null' as col2,'null' as col3,'null' as col4,'null' as col5,round(sum(vv)/10000,1) as num,'platform_vv_day' as module_name from {table} where {bid_not_in} and date>='{start_time}' and date<='{end_time}' group by date order by date)".format(table=table,start_time=self.start_date,end_time=self.end_date,bid_not_in=self.bid_not_in)
         return sql
 
-    def channel_vv_day(self):###全平台每日vv
-        sql = "select date,sum(vv) as vv from {table} where {bid_not_in} and cid in ({channel_cid}) and date>='{start_time}' and date<='{end_time}' group by date order by date".format(table=self.table,start_time=self.start_date,end_time=self.end_date,bid_not_in=self.bid_not_in,channel_cid=self.channel_cid)
+    def channel_vv_day(self,table):###全平台每日vv
+        sql = "(select date as col1,'null' as col2,'null' as col3,'null' as col4,'null' as col5,round(sum(vv)/10000,1) as num,'channel_vv_day' as module_name from {table} where {bid_not_in} and cid in ({channel_cid}) and date>='{start_time}' and date<='{end_time}' group by date order by date)".format(table=table,start_time=self.start_date,end_time=self.end_date,bid_not_in=self.bid_not_in,channel_cid=self.channel_cid)
         return sql
 
 
-    def platform_uv_day(self):###全平台每日uv
-        sql = "select date,sum(uv) as uv from {table} where {bid_not_in} and date>='{start_time}' and date<='{end_time}' group by date order by date".format(table=self.table,start_time=self.start_date,end_time=self.end_date,bid_not_in=self.bid_not_in)
+    def platform_uv_day(self,table):###全平台每日uv
+        sql = "(select date as col1,'null' as col2,'null' as col3,'null' as col4,'null' as col5,round(sum(uv)/10000,1) as num,'platform_uv_day' as module_name from {table} where {bid_not_in} and date>='{start_time}' and date<='{end_time}' group by date order by date)".format(table=table,start_time=self.start_date,end_time=self.end_date,bid_not_in=self.bid_not_in)
         return sql
 
-    def channel_uv_day(self):
-        sql = "select date,sum(uv) as uv from {table} where {bid_not_in} and cid in ({channel_cid}) and date>='{start_time}' and date<='{end_time}' group by date order by date".format(table=self.table,start_time=self.start_date,end_time=self.end_date,bid_not_in=self.bid_not_in,channel_cid=self.channel_cid)
+    def channel_uv_day(self,table):###频道模块每日uv
+        sql = "(select date as col1,'null' as col2,'null' as col3,'null' as col4,'null' as col5,round(sum(uv)/10000,1) as num,'channel_uv_day' as module_name from {table} where {bid_not_in} and cid in ({channel_cid}) and date>='{start_time}' and date<='{end_time}' group by date order by date)".format(table=table,start_time=self.start_date,end_time=self.end_date,bid_not_in=self.bid_not_in,channel_cid=self.channel_cid)
         return sql
 
-    def platform_pv_day(self):
-        sql = "select date,sum(pv) as pv from {table} where {dau_bid_not_in} and date>='{start_time}' and date<='{end_time}' group by date order by date".format(table=self.table,start_time=self.start_date,end_time=self.end_date,dau_bid_not_in=self.dau_bid_not_in)
+    def platform_pv_day(self,table):###全平台模块每日pv
+        sql = "(select date as col1,'null' as col2,'null' as col3,'null' as col4,'null' as col5,round(sum(pv)/10000,1) as num,'platform_pv_day' as module_name from {table} where {dau_bid_not_in} and date>='{start_time}' and date<='{end_time}' group by date order by date)".format(table=table,start_time=self.start_date,end_time=self.end_date,dau_bid_not_in=self.dau_bid_not_in)
         return sql
 
-    def platform_duration_day(self):
-        sql = "select date,sum(pt) as pt from {table} where {bid_not_in} and date>='{start_time}' and date<='{end_time}' group by date order by date".format(table=self.table,start_time=self.start_date,end_time=self.end_date,bid_not_in=self.bid_not_in)
+    def platform_duration_day(self,table):
+        sql = "(select date as col1,'null' as col2,'null' as col3,'null' as col4,'null' as col5,round(sum(pt)/600000,1) as num,'platform_duration_day' as module_name from {table} where {bid_not_in} and date>='{start_time}' and date<='{end_time}' group by date order by date)".format(table=table,start_time=self.start_date,end_time=self.end_date,bid_not_in=self.bid_not_in)
         return sql
 
-    def channel_duration_day(self):
-        sql = "select date,sum(pt) as pt from {table} where {bid_not_in} and cid in ({channel_cid}) and date>='{start_time}' and date<='{end_time}' group by date order by date".format(table=self.table,start_time=self.start_date,end_time=self.end_date,bid_not_in=self.bid_not_in,channel_cid=self.channel_cid)
+    def channel_duration_day(self,table):
+        sql = "(select date as col1,'null' as col2,'null' as col3,'null' as col4,'null' as col5,round(sum(pt)/600000,1) as num,'channel_duration_day' as module_name from {table} where {bid_not_in} and cid in ({channel_cid}) and date>='{start_time}' and date<='{end_time}' group by date order by date)".format(table=table,start_time=self.start_date,end_time=self.end_date,bid_not_in=self.bid_not_in,channel_cid=self.channel_cid)
         return sql
 
-    def platform_vv_terminal_day(self):###按终端查询vv
+    def platform_vv_terminal_day(self,table):###按终端查询vv
         case_when_sql = self.bid_sql()
-        sql = "select date,{case_when_sql} as bid_name,sum(vv) as vv from {table} " \
-              "where {bid_not_in} and date>='{start_time}' and date<='{end_time}' group by date,bid order by date".format(case_when_sql=case_when_sql,table=self.table,start_time=self.start_date,end_time=self.end_date,bid_not_in=self.bid_not_in)
+        sql = "(select date as col1,{case_when_sql} as col2,'null' as col3,'null' as col4,'null' as col5,round(sum(vv)/10000,1) as num,'platform_vv_terminal_day' as module_name from {table} " \
+              "where {bid_not_in} and date>='{start_time}' and date<='{end_time}' group by date,bid order by date)".format(case_when_sql=case_when_sql,table=table,start_time=self.start_date,end_time=self.end_date,bid_not_in=self.bid_not_in)
         return sql
 
-    def channel_vv_terminal_day(self):###按终端查询vv
+    def channel_vv_terminal_day(self,table):###按终端查询vv
         case_when_sql = self.bid_sql()
-        sql = "select date,{case_when_sql} as bid_name,sum(vv) as vv from {table} " \
-              "where {bid_not_in} and cid in ({channel_cid}) and date>='{start_time}' and date<='{end_time}' group by date,bid order by date".format(case_when_sql=case_when_sql,table=self.table,start_time=self.start_date,end_time=self.end_date,bid_not_in=self.bid_not_in,channel_cid=self.channel_cid)
+        sql = "(select date as col1,{case_when_sql} as col2,'null' as col3,'null' as col4,'null' as col5,round(sum(vv)/10000,1) as num,'channel_vv_terminal_day' as module_name from {table} " \
+              "where {bid_not_in} and cid in ({channel_cid}) and date>='{start_time}' and date<='{end_time}' group by date,bid order by date)".format(case_when_sql=case_when_sql,table=table,start_time=self.start_date,end_time=self.end_date,bid_not_in=self.bid_not_in,channel_cid=self.channel_cid)
         return sql
 
-    def platform_uv_terminal_day(self):
+    def platform_uv_terminal_day(self,table):
         case_when_sql = self.bid_sql()
-        sql = "select date,{case_when_sql} as bid_name,sum(uv) as uv from {table} " \
-              "where {bid_not_in} and date>='{start_time}' and date<='{end_time}' group by date,bid order by date".format(case_when_sql=case_when_sql,table=self.table,start_time=self.start_date,end_time=self.end_date,bid_not_in=self.bid_not_in)
+        sql = "(select date as col1,{case_when_sql} as col2,'null' as col3,'null' as col4,'null' as col5,round(sum(uv)/10000,1) as num,'platform_uv_terminal_day' as module_name from {table} " \
+              "where {bid_not_in} and date>='{start_time}' and date<='{end_time}' group by date,bid order by date)".format(case_when_sql=case_when_sql,table=table,start_time=self.start_date,end_time=self.end_date,bid_not_in=self.bid_not_in)
         return sql
 
-    def channel_uv_terminal_day(self):
+    def channel_uv_terminal_day(self,table):
         case_when_sql = self.bid_sql()
-        sql = "select date,{case_when_sql} as bid_name,sum(uv) as uv from {table} " \
-              "where {bid_not_in} and cid in ({channel_cid}) and date>='{start_time}' and date<='{end_time}' group by date,bid order by date".format(case_when_sql=case_when_sql,table=self.table,start_time=self.start_date,end_time=self.end_date,bid_not_in=self.bid_not_in,channel_cid=self.channel_cid)
+        sql = "(select date as col1,{case_when_sql} as col2,'null' as col3,'null' as col4,'null' as col5,round(sum(uv)/10000,1) as num,'channel_uv_terminal_day' as module_name from {table} " \
+              "where {bid_not_in} and cid in ({channel_cid}) and date>='{start_time}' and date<='{end_time}' group by date,bid order by date)".format(case_when_sql=case_when_sql,table=table,start_time=self.start_date,end_time=self.end_date,bid_not_in=self.bid_not_in,channel_cid=self.channel_cid)
         return sql
 
-    def platform_vv_channel_day(self):###按频道查询vv
+    def platform_vv_channel_day(self,table):###按频道查询vv
         case_when_sql = self.cid_sql()
-        sql = "select date,{case_when_sql} as cid_name,sum(vv) as vv from {table} " \
-              "where {bid_not_in} and date>='{start_time}' and date<='{end_time}' group by date,cid_name order by date".format(case_when_sql=case_when_sql,table=self.table,start_time=self.start_date,end_time=self.end_date,bid_not_in=self.bid_not_in)
+        sql = "(select date as col1,{case_when_sql} as col2,'null' as col3,'null' as col4,'null' as col5,round(sum(vv)/10000,1) as num,'platform_vv_channel_day' as module_name from {table} " \
+              "where {bid_not_in} and date>='{start_time}' and date<='{end_time}' group by date,col2 order by date)".format(case_when_sql=case_when_sql,table=table,start_time=self.start_date,end_time=self.end_date,bid_not_in=self.bid_not_in)
         return sql
 
-    def platform_uv_channel_day(self):
+    def platform_uv_channel_day(self,table):
         case_when_sql = self.cid_sql()
-        sql = "select date,{case_when_sql} as cid_name,sum(uv) as uv from {table} " \
-              "where {bid_not_in} and date>='{start_time}' and date<='{end_time}' group by date,cid_name order by date".format(case_when_sql=case_when_sql,table=self.table,start_time=self.start_date,end_time=self.end_date,bid_not_in=self.bid_not_in)
+        sql = "(select date as col1,{case_when_sql} as col2,'null' as col3,'null' as col4,'null' as col5,round(sum(uv)/10000,1) as num,'platform_uv_channel_day' as module_name from {table} " \
+              "where {bid_not_in} and date>='{start_time}' and date<='{end_time}' group by date,col2 order by date)".format(case_when_sql=case_when_sql,table=table,start_time=self.start_date,end_time=self.end_date,bid_not_in=self.bid_not_in)
         return sql
 
-    def platform_dau_day(self):
-        sql = "select date,sum(uv) as dau from {table} where {dau_bid_not_in} and date>='{start_time}' and date<='{end_time}' group by date order by date".format(table=self.table,start_time=self.start_date,end_time=self.end_date,dau_bid_not_in=self.dau_bid_not_in)
+    def platform_dau_day(self,table):
+        sql = "(select date as col1,'null' as col2,'null' as col3,'null' as col4,'null' as col5,round(sum(uv)/10000,1) as num,'platform_dau_day' as module_name from {table} where {dau_bid_not_in} and date>='{start_time}' and date<='{end_time}' group by date order by date)".format(table=table,start_time=self.start_date,end_time=self.end_date,dau_bid_not_in=self.dau_bid_not_in)
         return sql
 
-    def platform_vv_pid_day_avg(self):
-        sql = "select pid,round(sum(vv)/7) as vv from {table} where {bid_not_in} and pid in ({pid_str}) and date>='{start_time}' and date<='{end_time}' group by pid order by round(sum(vv)/7) desc limit 20".format(table=self.table,pid_str=self.pid_str,start_time=self.start_date,end_time=self.end_date,bid_not_in=self.bid_not_in)
+    def platform_vv_pid_day_avg(self,table):
+        sql = "(select pid as col1,'null' as col2,'null' as col3,'null' as col4,'null' as col5,round(sum(vv)/70000,1) as num,'platform_vv_pid_day_avg' as module_name" \
+              " from {table} where {bid_not_in} and pid in ({pid_str}) and date>='{start_time}' and date<='{end_time}' group by pid order by round(sum(vv)/7) desc limit 20)".format(table=table,pid_str=self.pid_str,start_time=self.last_week_start_date,end_time=self.last_week_end_date,bid_not_in=self.bid_not_in)
         return sql
 
-    def channel_vv_pid_day_avg(self):
+    def channel_vv_pid_day_avg(self,table):
         case_when_sql = self.bid_sql()
-        sql = "select a.bid_name,a.pid,a.vv from " \
-              "(select {case_when_sql} as bid_name,pid,round(sum(vv)/7) as vv from {table} where pid in ({pid_str}) and date>='{start_time}' and date<='{end_time}' " \
-              "and bid in (1,102,9,12) and cid in ({channel_cid}) GROUP BY bid,pid) a".format(table=self.table,case_when_sql=case_when_sql,start_time=self.start_date,end_time=self.end_date,channel_cid=self.channel_cid,pid_str=self.pid_str)
+        sql = "(select a.bid_name as col1,a.pid as col2,'null' as col3,'null' as col4,'null' as col5,a.vv as num,'channel_vv_pid_day_avg' as module_name from " \
+              "(select {case_when_sql} as bid_name,pid,round(sum(vv)/70000,1) as vv from {table} where pid in ({pid_str}) and date>='{start_time}' and date<='{end_time}' " \
+              "and bid in (1,102,9,12) and cid in ({channel_cid}) GROUP BY bid,pid) a)".format(table=table,case_when_sql=case_when_sql,start_time=self.last_week_start_date,end_time=self.last_week_end_date,channel_cid=self.channel_cid,pid_str=self.pid_str)
         return sql
 
-    def platform_uv_pid_day_avg(self):
-        sql = "select pid,round(sum(uv)/7) as uv from {table} where {bid_not_in} and date>='{start_time}' and date<='{end_time}' group by pid order by round(sum(uv)/7) desc limit 20".format(table=self.table,start_time=self.start_date,end_time=self.end_date,bid_not_in=self.bid_not_in)
+    def platform_uv_pid_day_avg(self,table):
+        sql = "(select pid as col1,'null' as col2,'null' as col3,'null' as col4,'null' as col5,round(sum(uv)/70000,1) as num,'platform_uv_pid_day_avg' as module_name" \
+              " from {table} where {bid_not_in} and date>='{start_time}' and date<='{end_time}' group by pid order by round(sum(uv)/7) desc limit 20)".format(table=table,start_time=self.last_week_start_date,end_time=self.last_week_end_date,bid_not_in=self.bid_not_in)
         return sql
 
-    def channel_uv_pid_day_avg(self):
+    def channel_uv_pid_day_avg(self,table):
         case_when_sql = self.bid_sql()
-        sql = "select a.bid_name,a.pid,a.uv,a.rank from " \
-              "(select {case_when_sql} as bid_name,pid,round(sum(uv)/7) as uv,rank() over (partition by bid order by sum(uv)/7 desc) as rank from {table} where date>='{start_time}' and date<='{end_time}' " \
-              "and bid in (1,102,9,12) and cid in ({channel_cid}) GROUP BY bid,pid) a where a.rank<='10'".format(table=self.table,case_when_sql=case_when_sql,start_time=self.start_date,end_time=self.end_date,channel_cid=self.channel_cid)
+        sql = "(select a.pid as col1,a.bid_name as col2,'null' as col3,'null' as col4,'null' as col5,a.uv as num,'channel_uv_pid_day_avg' as module_name from " \
+              "(select {case_when_sql} as bid_name,pid,round(sum(uv)/70000,1) as uv,rank() over (partition by bid order by sum(uv)/7 desc) as rank from {table} where date>='{start_time}' and date<='{end_time}' " \
+              "and bid in (1,102,9,12) and cid in ({channel_cid}) GROUP BY bid,pid) a where a.rank<='10')".format(table=table,case_when_sql=case_when_sql,start_time=self.last_week_start_date,end_time=self.last_week_end_date,channel_cid=self.channel_cid)
         return sql
 
-    def channel_pid_vv_change(self):
+    def channel_pid_vv_change(self,table):
         ###判断是否传过来了pid字符串,若无则查询top50vv,若有则查询给予pid的vv
         if not hasattr(self,'pid_str'):
-            sql = "select pid,sum(vv) as vv from {table} where {bid_not_in} and cid in ({channel_cid}) and date>='{start_time}' and date<='{end_time}' group by pid order by sum(vv) desc limit 50".format(
-                table=self.table, start_time=self.start_date, end_time=self.end_date, bid_not_in=self.bid_not_in ,channel_cid=self.channel_cid)
+            sql = "(select pid as col1,'null' as col2,'null' as col3,'null' as col4,'null' as col5,round(sum(vv)/10000,1) as num,'channel_pid_vv_change_this' as module_name from {table} where {bid_not_in} and cid in ({channel_cid}) and date>='{start_time}' and date<='{end_time}' group by pid order by sum(vv) desc limit 50)".format(
+                table=table, start_time=self.last_week_start_date, end_time=self.last_week_end_date, bid_not_in=self.bid_not_in ,channel_cid=self.channel_cid)
         else:
-            sql = "select pid,sum(vv) as vv from {table} where {bid_not_in} and cid in ({channel_cid}) and date>='{start_time}' and date<='{end_time}' and pid in ({pid_str}) group by pid ".format(
-                table=self.table, start_time=self.start_date, end_time=self.end_date, bid_not_in=self.bid_not_in,pid_str=self.pid_str ,channel_cid=self.channel_cid)
+            sql = "(select pid as col1,'null' as col2,'null' as col3,'null' as col4,'null' as col5,round(sum(vv)/10000,1) as num,'channel_pid_vv_change_before' as module_name from {table} where {bid_not_in} and cid in ({channel_cid}) and date>='{start_time}' and date<='{end_time}' and pid in ({pid_str}) group by pid)".format(
+                table=table, start_time=self.last_2week_start_date, end_time=self.last_2week_end_date, bid_not_in=self.bid_not_in,pid_str=self.pid_str ,channel_cid=self.channel_cid)
         return sql
 
     def bid_sql(self):###构造bid sql
@@ -255,7 +261,6 @@ class Newmofang(object):
             sql += "when {cid} then '{cid_name}' ".format(cid=cid,cid_name=self.cid_dict[cid])
         sql += "else 'else' end"
         return sql
-
 
     def datetime_process(self):###返回查询中开始时间与结束时间段内的日期列表
         start_date = datetime.datetime.strptime(self.start_date, '%Y%m%d').date()  ###字符串转换为日期格式
@@ -277,8 +282,11 @@ if __name__ == '__main__':
     # print newmofang(searchtype='vv_platform_month').sql_query()
     # print newmofang(searchtype='vv_platform_day',start_date='20170301',end_date='20170307').sql_query()
     # print newmofang(searchtype='vv_terminal_day', start_date='20170301', end_date='20170307').sql_query()
-    aa = Newmofang(pid_str="'7619', '12100', '50038', '50387', '50396', '108685', '156419', '291786', '292185', '292468', '293541', '294230', '294671', '299619', '304303', '305402', '305867', '305954', '306383', '309055', '309903', '309991'").cms_sql()
-    print set(map(lambda x:x[2],aa))
-    # print Newmofang(searchtype='vv_channel_month', channel_name='show', end_date='20170302').sql_query()
+    pp = Newmofang(start_date='20170401',end_date='20170406')
+    aa = pp.module_search(searchtype='platform_kpi')
+    bb = pp.module_search(searchtype='platform_vv_month')
+    print pp.sql_union(aa,bb)
+    # qq = Newmofang(searchtype='platform_vv_month',channel_name='show',start_date='20170401',end_date='20170406').platform_vv_month()
+    # sql_all = Newmofang().sql_union(pp,qq)
     # print newmofang('vv','20170102','20170302').sql_query()
     # print newmofang('uv','20170102','20170302').sql_query()
