@@ -92,7 +92,7 @@ def platform(request):
     ###数据处理
     pid_day_avg_result = platform_pid_day_avg_result_process(pid_str, vv_pid_day_avg_result, uv_pid_day_avg_result)
 
-    kpi_ratio = kpi_platform_process(kpi_platform_result)
+    kpi_ratio = kpi_platform_process(kpi_platform_result,end_date)
 
     overview_platform_day_dict = overview_platform_day_process(date_list,end_date,month_to_month_date,year_to_year_date,vv_day_result,uv_day_result,pv_day_result,duration_day_result)###往日概览数据
     vv_month_date, vv_month_lastyear, vv_month_thisyear = vv_month_process(vv_month_result=vv_month_result)###平台月度uv数据
@@ -105,16 +105,13 @@ def platform(request):
 
     end_time = time.time()
     print 'time elapse is %s'%(end_time-start_time)
-    return render(request, 'index.html', {'kpi_ratio':kpi_ratio,'vv_day_date':json.dumps(vv_day_date),'vv_day_data':json.dumps(vv_day_data),
+    return render(request, 'platform.html', {'kpi_ratio':kpi_ratio,'vv_day_date':json.dumps(vv_day_date),'vv_day_data':json.dumps(vv_day_data),
                                        'uv_day_data': json.dumps(uv_day_data),'vv_month_date':json.dumps(vv_month_date),
                                           'vv_month_lastyear':json.dumps(vv_month_lastyear),'vv_month_thisyear':json.dumps(vv_month_thisyear),
                                           'vv_terminal_day_dict':vv_terminal_day_dict,'uv_terminal_day_dict':uv_terminal_day_dict,'vv_channel_day_dict':vv_channel_day_dict,
                                        'uv_channel_day_dict':uv_channel_day_dict,'dau_day_data':dau_day_data,'uv_ration_day_data':uv_ration_day_data,
                                         'overview_platform_day_dict':overview_platform_day_dict,'pid_day_avg_result':json.dumps(pid_day_avg_result),
                                           'date_str':date_str})
-
-def ltt(request):
-    pass
 
 
 def channel(request):
@@ -206,7 +203,7 @@ def channel(request):
 
 
     ###数据转化为列表传入前端
-    kpi_ratio = kpi_channel_process(kpi_channel_result,channel_name)
+    kpi_ratio = kpi_channel_process(kpi_channel_result,channel_name,end_date)
 
     overview_channel_day_dict = overview_channel_day_process(date_list,end_date,month_to_month_date,year_to_year_date,vv_day_result,uv_day_result,duration_day_result)###往日概览数据
     vv_month_date, vv_month_lastyear, vv_month_thisyear = vv_month_process(vv_month_result=vv_month_result)###平台月度uv数据
@@ -215,7 +212,7 @@ def channel(request):
     uv_terminal_day_dict = uv_terminal_day_process(uv_terminal_day_result=uv_terminal_day_result,terminal_list=terminal_list)  ###分端uv变化
     end_time = time.time()
     print 'time elapse is %s'%(end_time-start_time)
-    return render(request,'channel_ltt.html',{'path':path,'vv_month_date':json.dumps(vv_month_date),'vv_month_lastyear':json.dumps(vv_month_lastyear),'channel_name_eng':channel_name_eng,
+    return render(request,'channel.html',{'path':path,'vv_month_date':json.dumps(vv_month_date),'vv_month_lastyear':json.dumps(vv_month_lastyear),'channel_name_eng':channel_name_eng,
                                    'vv_month_thisyear':json.dumps(vv_month_thisyear),'date_str':date_str,'channel_name':json.dumps([channel_dict[channel_name]]),
                                         'kpi_ratio':kpi_ratio,'overview_channel_day_dict':overview_channel_day_dict,'channel_name_div':[channel_dict[channel_name]],
                                           'vv_day_data': json.dumps(vv_day_data),'uv_day_data':json.dumps(uv_day_data),'vv_day_date':json.dumps(vv_day_date),
@@ -262,19 +259,30 @@ def date_calculate(calculate_date):
            last_2week_end_date,month_to_month_date,year_to_year_date,date_str
 
 
-def kpi_platform_process(kpi_platform_result):
+def kpi_platform_process(kpi_platform_result,end_date):
     ###每季度的kpi目标
-    kpi_target = 10000
-    kpi_now = kpi_platform_result['num'].unique()
-    kpi_ratio = round(kpi_now/kpi_target*100,2)
+    kpi_target = {2017:{01:10000,02:10000}}
+    ###每个月对应的季度
+    quarter = {1: 1, 2: 1, 3: 1, 4: 2, 5: 2, 6: 2, 7: 3, 8: 3, 9: 3, 10: 4, 11: 4, 12: 4}
+    year = int(end_date[:4])###当前年份
+    month = int(end_date[4:6])###当前月份
+    quarter_now = quarter[month]###当前季度
+    kpi_now = kpi_platform_result['num'].unique()###当前已完成kpi
+    kpi_target_quarter = kpi_target[year][quarter_now]
+    kpi_ratio = round(kpi_now/kpi_target_quarter*100,2)
     return kpi_ratio
 
-def kpi_channel_process(kpi_channel_result,channel_name):
+def kpi_channel_process(kpi_channel_result,channel_name,end_date):
     ###每季度的kpi目标
-    kpi_target_dict = {'show':3500,'tv':3500,'movie':600,'cartoon':2200,'music':60}
-    kpi_target = kpi_target_dict[channel_name]
+    kpi_target_dict = {'show':{2017:{01:2835,02:2835}},'tv':{2017:{01:3000,02:3000}},'movie':{2017:{01:600,02:600}},'cartoon':{2017:{01:2200,02:2100}}}
+    ###每个月对应的季度
+    quarter = {1: 1, 2: 1, 3: 1, 4: 2, 5: 2, 6: 2, 7: 3, 8: 3, 9: 3, 10: 4, 11: 4, 12: 4}
+    year = int(end_date[:4])###当前年份
+    month = int(end_date[4:6])###当前月份
+    quarter_now = quarter[month]###当前季度
     kpi_now = kpi_channel_result['num'].unique()
-    kpi_ratio = round(kpi_now/kpi_target*100,2)
+    kpi_target_quarter = kpi_target_dict[channel_name][year][quarter_now]
+    kpi_ratio = round(kpi_now/kpi_target_quarter*100,2)
     return kpi_ratio
 
 

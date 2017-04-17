@@ -20,6 +20,8 @@
     <!--[if lt IE 9]>
       <script src="{% static 'blue-moon/js/html5shiv.js' %}"></script>
       <script src="{% static 'blue-moon/js/respond.min.js' %}"></script>
+
+
     <![endif]-->
   </head>
 
@@ -47,7 +49,7 @@
               </a>
             </li>
             <li class='active'>
-              <a href="forms.html">
+              <a href="#">
                 <i class="fa fa-bar-chart-o"></i>频道</a>
               <ul>
                  <li><a href="/display/channel?name=show">综艺</a></li>
@@ -57,7 +59,11 @@
               </ul>
             </li>
             <li class=''>
-              <a href='#'><i class="fa fa-caret-square-o-right"></i>节目</a>
+              <a href='#'><i class="fa fa-caret-square-o-right"></i>
+                <div class="mini-widget" data-tip='即将上线 敬请期待'>
+                节目
+                </div>
+              </a>
               <!--<ul>-->
                  <!--<li><a href='flot.html'>Flot Graphs</a></li>-->
                  <!--<li><a href='graphs.html'>Google Graph</a></li>-->
@@ -81,9 +87,9 @@
 
                 <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
                   <div style="font-size: 24px;font-weight: bold;margin:0 -15px;color:#000;" >
-                    {{channel_name_div.0}}频道每日概况
+                    {{channel_name_div.0}}频道 每日概况
                     <span class="mini-title" style="font-size: 15px;color:#000;">
-                      {{date_str.0}}
+                      &nbsp;&nbsp;{{date_str.0}}
                     </span>
                   </div>
                 </div>
@@ -101,12 +107,14 @@
 
             </div>
             <div class="widget-body">
-              <div class="row">
-                <div class="col-lg-2 col-md-2 col-sm-6" >
-                  <div id="header_one" style="height:150px;"></div>
+              <div class="row row-special">
+                <div class="col-lg-2 col-md-2 col-md-offset-1 col-sm-6" >
+                  <div class="mini-widget" data-tip="截止当日的当季日均VV值/目标值">
+                    <div id="header_one" style="height:150px;"></div>
+                  </div>
                 </div>
                 <div class="col-lg-2 col-md-2  col-sm-6">
-                  <div class="mini-widget">
+                  <div class="mini-widget" data-tip='当日的播放次数，同比为上周同日，环比为前日'>
                     <div class="mini-widget-heading clearfix">
                       <div class="text-center">VV</div>
                     </div>
@@ -126,7 +134,7 @@
                   </div>
                 </div>
                 <div class="col-lg-2 col-md-2 col-sm-6">
-                  <div class="mini-widget">
+                  <div class="mini-widget" data-tip='当日的播放次数，同比为上周同日，环比为前日'>
                     <div class="mini-widget-heading clearfix">
                       <div class="text-center">UV</div>
                     </div>
@@ -147,7 +155,7 @@
                 </div>
 
                 <div class="col-lg-2 col-md-2 col-sm-6">
-                  <div class="mini-widget">
+                  <div class="mini-widget" data-tip="当日的VV/UV">
                     <div class="mini-widget-heading clearfix">
                       <div class="text-center">人均播放次数</div>
                     </div>
@@ -167,7 +175,7 @@
                   </div>
                 </div>
                 <div class="col-lg-2 col-md-2 col-sm-6">
-                  <div class="mini-widget">
+                  <div class="mini-widget" data-tip="当日总播放时长/UV">
                     <div class="mini-widget-heading clearfix">
                       <div class="text-center">人均播放时长</div>
                     </div>
@@ -281,48 +289,7 @@
                 </div>
               </div>
 
-	<div class="widget">
-            <div class="wedger-header-blue">
-              <div style="font-size: 24px;font-weight: bold;color:#000;">
-                运营分析
-              </div>
-            </div>
-            <div class="widget-body">
-              <div class="row">
-                              <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                                <div class="widget">
-                                  <div class="widget-header">
-                                    <div class="title">
-                                      合集vv涨跌幅 Top10
-                                  <span class="mini-title">
-                                  </span>
-                                    </div>
-                                  </div>
-                                  <div class="widget-body">
-                                    <div id="channel_pid_vv_change" style="height: 600px"></div>
-                                  </div>
-                                </div>
 
-                              </div>
-                              <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                                <div class="widget">
-                                  <div class="widget-header">
-                                    <div class="title">
-                                      合集分端vv、uv Top10(日均VV、日均UV、日均VV/UV)
-                                    <span class="mini-title" style="font-size: 15px;color:#000;">
-                                      {{date_str.1}}
-                                    </span>
-                                    </div>
-                                  </div>
-                                  <div class="widget-body">
-                                    <div id="channel_vv_uv_program" style="height: 600px"></div>
-                                  </div>
-                                </div>
-
-                              </div>
-                            </div>
-	</div>
-</div>
               <!-- Row End -->
               <br/>
           </div>
@@ -330,6 +297,65 @@
 
 
         </div>
+          <div class="widget">
+            <div class="wedger-header-blue">
+              <div style="font-size: 24px;font-weight: bold;color:#000;">
+                运营分析
+              </div>
+            </div>
+            <div class="widget-body">
+              <div class="row">
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                  <div class="widget">
+                    <div class="widget-header">
+                      <div class="title">
+                        上周vv环比涨幅Top10
+                                    <span class="mini-title" style="font-size: 15px;color:#000;">
+                                      {{date_str.1}}
+                                    </span>
+                      </div>
+                    </div>
+                    <div class="widget-body">
+                      <div id="channel_pid_vv_increase" style="height: 600px"></div>
+                    </div>
+                  </div>
+
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                  <div class="widget">
+                    <div class="widget-header">
+                      <div class="title">
+                        上周vv环比跌幅Top10
+                                    <span class="mini-title" style="font-size: 15px;color:#000;">
+                                      {{date_str.1}}
+                                    </span>
+                      </div>
+                    </div>
+                    <div class="widget-body">
+                      <div id="channel_pid_vv_decrease" style="height: 600px"></div>
+                    </div>
+                  </div>
+
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                  <div class="widget">
+                    <div class="widget-header">
+                      <div class="title">
+                        上周合集分端vv、uv Top10(日均值)
+                                    <span class="mini-title" style="font-size: 15px;color:#000;">
+                                      {{date_str.1}}
+                                    </span>
+                      </div>
+                    </div>
+                    <div class="widget-body">
+                      <div id="channel_vv_uv_program" style="height: 600px"></div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
         <!-- Dashboard Wrapper End -->
 
         <footer>
@@ -393,6 +419,7 @@
         //channel_vv_uv_program
         var pid_day_avg_result_list = {{ pid_day_avg_result|safe }};
 
+
       </script>
       <script src="{% static 'js/jquery.js' %}"></script>
       <script src="{% static 'js/bootstrap.min.js' %}"></script>
@@ -406,7 +433,8 @@
       <script src="{% static 'js/channel_vv_uv_day.js' %}"></script>
       <script src="{% static 'js/channel_vv_terminal_day.js' %}"></script>
       <script src="{% static 'js/channel_uv_terminal_day.js' %}"></script>
-      <script src="{% static 'js/channel_pid_vv_change.js' %}"></script>
+      <script src="{% static 'js/channel_pid_vv_increase.js' %}"></script>
+      <script src="{% static 'js/channel_pid_vv_decrease.js' %}"></script>
       <script src="{% static 'js/channel_vv_uv_program.js' %}"></script>
 
 
