@@ -19,9 +19,9 @@
               }
             },
             title: {
-            text: 'x轴为uv，y轴为vv',
+            text: 'x轴为vv，y轴为uv',
             left: 'center',
-            subtext:'气泡大小为人均vv。点越靠上，vv越大，越靠右，uv越大。',
+            subtext:'气泡大小为人均vv。点越靠右，vv越大，越靠上，uv越大。',
             textStyle: {
               fontWeight: 'bolder',
               textAlign:'right',
@@ -33,13 +33,13 @@
                 data: ['pcweb','android','iphone','ott']
             },
             xAxis: {
-		          name: 'UV',
+		          name: 'VV',
                   splitLine: {
                       show: false
                   }
             },
             yAxis: {
-		          name: 'VV',
+		          name: 'UV',
                   splitLine: {
                       show: false
                   },
@@ -58,8 +58,8 @@
                     emphasis: {
                         show: true,
                         formatter: function (param) {
-                            var uv = param.data[0];
-                            var vv = param.data[1];
+                            var vv = param.data[0];
+                            var uv = param.data[1];
                             var name = param.data[3];
                             var all = name+'\n日均vv:'+vv+'万\n日均uv:'+uv+'万';
                             return all;
@@ -96,8 +96,8 @@
                     emphasis: {
                         show: true,
                         formatter: function (param) {
-                            var uv = param.data[0];
-                            var vv = param.data[1];
+                            var vv = param.data[0];
+                            var uv = param.data[1];
                             var name = param.data[3];
                             var all = name+'\n日均vv:'+vv+'万\n日均uv:'+uv+'万';
                             return all;
@@ -133,8 +133,8 @@
                     emphasis: {
                         show: true,
                         formatter: function (param) {
-                            var uv = param.data[0];
-                            var vv = param.data[1];
+                            var vv = param.data[0];
+                            var uv = param.data[1];
                             var name = param.data[3];
                             var all = name+'\n日均vv:'+vv+'万\n日均uv:'+uv+'万';
                             return all;
@@ -170,8 +170,8 @@
                     emphasis: {
                         show: true,
                         formatter: function (param) {
-                            var uv = param.data[0];
-                            var vv = param.data[1];
+                            var vv = param.data[0];
+                            var uv = param.data[1];
                             var name = param.data[3];
                             var all = name+'\n日均vv:'+vv+'万\n日均uv:'+uv+'万';
                             return all;

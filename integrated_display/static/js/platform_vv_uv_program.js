@@ -19,9 +19,9 @@
               }
             },
             title: {
-            text: 'x轴为uv，y轴为vv',
+            text: 'x轴为vv，y轴为uv',
             left: 'center',
-            subtext:'气泡大小为人均vv。点越靠上，vv越大，越靠右，uv越大。',
+            subtext:'气泡大小为人均vv。点越靠右，vv越大，越靠上，uv越大。',
             textStyle: {
               fontWeight: 'bolder',
               textAlign:'right',
@@ -30,16 +30,16 @@
           },            
 	    legend: {
                 right: 50,
-                data: ['综艺','电视剧','电影','动漫']
+                data: ['综艺','电视剧']
             },
             xAxis: {
-		          name: 'UV',
+		          name: 'VV',
                   splitLine: {
                       show: false
                   }
             },
             yAxis: {
-		          name: 'VV',
+		          name: 'UV',
                   splitLine: {
                       show: false
                   },
@@ -56,13 +56,13 @@
                     emphasis: {
                         show: true,
                         formatter: function (param) {
-                            var uv = param.data[0];
-                            var vv = param.data[1];
+                            var vv = param.data[0];
+                            var uv = param.data[1];
                             var name = param.data[3];
                             var all = name+'\n日均vv:'+vv+'万\n日均uv:'+uv+'万';
                             return all;                            
                         },
-                        position: 'top'
+                        position: 'right'
                     }
                 },
                 itemStyle: {
@@ -93,13 +93,13 @@
                     emphasis: {
                         show: true,
                         formatter: function (param) {
-                            var uv = param.data[0];
-                            var vv = param.data[1];
+                            var vv = param.data[0];
+                            var uv = param.data[1];
                             var name = param.data[3];
                             var all = name+'\n日均vv:'+vv+'万\n日均uv:'+uv+'万';
                             return all;                            
                         },
-                        position: 'top'
+                        position: 'right'
                     }
                 },
                 itemStyle: {
@@ -116,79 +116,7 @@
                         }])
                     }
                 }
-            },
-{
-                name: '电影',
-                data: data[2],
-                type: 'scatter',
-                symbolSize: function (data) {
-                console.log(data[2]);
-                    return data[2]*10;
-                },
-                label: {
-                    emphasis: {
-                        show: true,
-                        formatter: function (param) {
-                            var uv = param.data[0];
-                            var vv = param.data[1];
-                            var name = param.data[3];
-                            var all = name+'\n日均vv:'+vv+'万\n日均uv:'+uv+'万';
-                            return all;
-                        },
-                        position: 'top'
-                    }
-                },
-                itemStyle: {
-                    normal: {
-                        shadowBlur: 10,
-                        shadowColor: 'rgba(25, 100, 150, 0.5)',
-                        shadowOffsetY: 5,
-                        color: new echarts.graphic.RadialGradient(0.4, 0.3, 1, [{
-                            offset: 0,
-                            color: 'rgb(144,238,144)'
-                        }, {
-                            offset: 1,
-                            color: 'rgb(34,139,34)'
-                        }])
-                    }
-                }
-            },
-{
-                name: '动漫',
-                data: data[3],
-                type: 'scatter',
-                symbolSize: function (data) {
-                console.log(data[2]);
-                    return data[2]*10;
-                },
-                label: {
-                    emphasis: {
-                        show: true,
-                        formatter: function (param) {
-                            var uv = param.data[0];
-                            var vv = param.data[1];
-                            var name = param.data[3];
-                            var all = name+'\n日均vv:'+vv+'万\n日均uv:'+uv+'万';
-                            return all;
-                        },
-                        position: 'top'
-                    }
-                },
-                itemStyle: {
-                    normal: {
-                        shadowBlur: 10,
-                        shadowColor: 'rgba(25, 100, 150, 0.5)',
-                        shadowOffsetY: 5,
-                        color: new echarts.graphic.RadialGradient(0.4, 0.3, 1, [{
-                            offset: 0,
-                            color: 'rgb(255,140,0)'
-                        }, {
-                            offset: 1,
-                            color: 'rgb(255,140,0)'
-                        }])
-                    }
-                }
-            },
+            }
             ]
         };
 

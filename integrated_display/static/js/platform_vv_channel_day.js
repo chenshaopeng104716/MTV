@@ -12,7 +12,8 @@
                     text: ''
                 },
                 tooltip : {
-                    trigger: 'axis'
+                    trigger: 'axis',
+                    formatter:'{b0}<br>{a0}: {c0}万<br />{a1}: {c1}万<br />{a2}: {c2}万<br />{a3}: {c3}万'
                 },
                 legend: {
                     data:['综艺','电视剧','电影','动漫']

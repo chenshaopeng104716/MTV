@@ -5,7 +5,8 @@
         var option = {
 
             tooltip: {
-                trigger: 'axis'
+                trigger: 'axis',
+                formatter:'{b0}<br>{a0}: {c0}万<br />{a1}: {c1}万'
             },
             legend: {
                 data:['2016','2017']

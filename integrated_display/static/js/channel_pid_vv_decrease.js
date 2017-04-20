@@ -7,15 +7,7 @@
                 trigger: 'axis',
                 axisPointer : {            // 坐标轴指示器，坐标轴触发有效
                     type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
-                },
-		formatter:'{c}%'
-            },
-            toolbox: {
-              show: true,
-              feature: {
-                dataView: {readOnly: false},
-                saveAsImage: {}
-              }
+                }
             },
             grid: {
                 left: '3%',
@@ -28,8 +20,7 @@
                     type : 'value',
                     splitLine: {
                         show: false
-                    },
-                    inverse:'True',
+                    }
                 }
             ],
             yAxis : [
@@ -39,12 +30,7 @@
                     splitLine: {
                         show: false
                     },
-                    data : pid_vv_change_dict.decrease_name,
-                    axisLabel:{
-                            textStyle:{
-                                    align:'right'
-                            },
-                    },
+                    data : pid_vv_change_dict.decrease_name
                 }
             ],
             series : [
@@ -55,8 +41,8 @@
                     label: {
                         normal: {
                             show: true,
-                            position: 'right',
-                            formatter: '{c}%'
+                            position: 'inside',
+                            formatter: '{c}万'
                         }
                     },
                     data:pid_vv_change_dict.decrease_vv
