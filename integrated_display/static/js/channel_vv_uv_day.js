@@ -7,6 +7,7 @@
             tooltip : {
                 trigger: 'axis',
                 formatter:'{b0}<br>{a0}: {c0}万<br />{a1}: {c1}万'
+
             },
             legend: {
                 data:[{name:'vv',icon:'circle',textStyle:{color:'red'}},{name:'uv',icon:'circle',textStyle:{color:'blue'}}]

@@ -7,6 +7,7 @@
             tooltip: {
                 trigger: 'axis',
                 formatter:'{a0}: {c0}万<br />{a1}: {c1}万'
+
             },
             legend: {
                 data:['2016','2017']
@@ -37,7 +38,6 @@
                 name: '2016',
                 type: 'bar',
                 data: vv_month_lastyear
-
                 },
                 {
                 name: '2017',
