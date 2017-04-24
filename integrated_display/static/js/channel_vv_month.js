@@ -6,7 +6,6 @@
 
             tooltip: {
                 trigger: 'axis',
-                formatter:'{a0}: {c0}万<br />{a1}: {c1}万'
 
             },
             legend: {
