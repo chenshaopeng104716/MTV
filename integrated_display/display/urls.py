@@ -8,4 +8,5 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^$', views.platform, name='platform'),
     url(r'^channel/$',views.channel,name='channel'),
+    url(r'^program/$',views.program,name='program'),
 ]

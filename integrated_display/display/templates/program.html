@@ -1,0 +1,293 @@
+{% load  staticfiles %}
+<html>
+  <head>
+    <title>运营分析可视化平台</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Blue Moon - Responsive Admin Dashboard" />
+    <meta name="keywords" content="Notifications, Admin, Dashboard, Bootstrap3, Sass, transform, CSS3, HTML5, Web design, UI Design, Responsive Dashboard, Responsive Admin, Admin Theme, Best Admin UI, Bootstrap Theme, Wrapbootstrap, Bootstrap, bootstrap.gallery" />
+    <meta name="author" content="Bootstrap Gallery" />
+    <link rel="shortcut icon" href="{% static 'img/favicon.ico' %}">
+    <link href="{% static 'blue-moon/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'blue-moon/css/new.css' %}" rel="stylesheet">
+    <link href="{% static 'blue-moon/css/charts-graphs.css' %}" rel="stylesheet">
+    <!-- Datepicker CSS -->
+    <link rel="stylesheet" type="text/css" href="{% static 'blue-moon/css/datepicker.css' %}">
+
+    <link href="{% static 'blue-moon/fonts/font-awesome.min.css' %}" rel="stylesheet">
+
+    <!-- HTML5 shiv and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="{% static 'blue-moon/js/html5shiv.js' %}"></script>
+      <script src="{% static 'blue-moon/js/respond.min.js' %}"></script>
+
+
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <!-- Header Start -->
+    <header>
+
+      <h2 style="color:#fff;width:600px;float:left;font-family: 'Microsoft YaHei';margin: 7px 0 0 0;line-height: 50px"><img src="{% static 'images/MTV.png' %}"/><span style="margin-left:5px;vertical-align: bottom">运营分析可视化平台</span></h2>
+
+    </header>
+    <!-- Header End -->
+
+    <!-- Main Container start -->
+    <div class="dashboard-container">
+
+      <div class="container">
+        <!-- Top Nav Start -->
+        <div id='cssmenu'>
+          <ul>
+            <li>
+              <a href='/display/'>
+                <i class="fa fa-dashboard"></i>
+                <span >全平台</span>
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                <i class="fa fa-bar-chart-o"></i>频道</a>
+              <ul>
+                 <li><a href="/display/channel?name=show">综艺</a></li>
+                 <li><a href="/display/channel?name=tv">电视剧</a></li>
+                 <li><a href="/display/channel?name=movie">电影</a></li>
+                 <li><a href="/display/channel?name=cartoon">动漫</a></li>
+              </ul>
+            </li>
+            <li class='active'>
+              <a href='/display/program?id=312654'><i class="fa fa-caret-square-o-right"></i>
+                <!--<div class="mini-widget" data-tip='即将上线 敬请期待'>-->
+                节目
+                <!--</div>-->
+              </a>
+              <!--<ul>-->
+                 <!--<li><a href='flot.html'>Flot Graphs</a></li>-->
+                 <!--<li><a href='graphs.html'>Google Graph</a></li>-->
+                 <!--<li><a href='vector-maps.html'>Vector Maps</a></li>-->
+              <!--</ul>-->
+            </li>
+
+          </ul>
+        </div>
+
+        <!-- Top Nav End -->
+
+
+
+        <!-- Sub Nav End -->
+
+        <!-- Dashboard Wrapper Start -->
+        <div class="dashboard-wrapper-lg">
+          <!-- Row Start -->
+          <div class="widget">
+            <div class="wedger-header-blue">
+              <div style="font-size: 24px;font-weight: bold;color:#000;">
+                {{program_name}}
+              </div>
+            </div>
+            <div class="widget-body">
+              <div class="row">
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                  <div class="widget">
+                    <div class="widget-header">
+                      <div class="title">
+                        日VV-UV趋势
+                    <span class="mini-title">
+                    </span>
+                      </div>
+                    </div>
+                    <div class="widget-body">
+                      <div id="program_vv_uv_day" style="position: relative;height: 300px;"></div>
+                    </div>
+                  </div>
+
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                  <div class="widget">
+                    <div class="widget-header">
+                      <div class="title">
+                        日UV分端趋势
+                    <span class="mini-title">
+                    </span>
+                      </div>
+                    </div>
+                    <div class="widget-body">
+                      <div id="program_uv_terminal_day" style="height: 300px"></div>
+                    </div>
+                  </div>
+
+                </div>
+
+              </div>
+            </div>
+          </div>
+          <!-- Row Start -->
+          <div class="widget">
+            <div class="wedger-header-blue">
+              <div style="font-size: 24px;font-weight: bold;color:#000;">
+                趋势分析
+              </div>
+            </div>
+            <div class="widget-body">
+              <div class="row">
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                  <div class="widget">
+                    <div class="widget-header">
+                      <div class="title">
+                        正短片vv分布
+                    <span class="mini-title">
+                    </span>
+                      </div>
+                    </div>
+                    <div class="widget-body">
+                      <div id="program_duration_isfull_day" style="height: 500px"></div>
+                    </div>
+                  </div>
+
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                  <div class="widget">
+                    <div class="widget-header">
+                      <div class="title">
+                        分端时长分布&nbsp{{end_date}}
+                    <span class="mini-title">
+                    </span>
+                      </div>
+                    </div>
+                    <div class="widget-body">
+                      <div id="program_pt_type_day" style="height: 500px"></div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+
+              <!-- Row End -->
+              <br/>
+          </div>
+
+
+
+        </div>
+          <!-- Row Start -->
+          <div class="widget">
+            <div class="wedger-header-blue">
+              <div style="font-size: 24px;font-weight: bold;color:#000;">
+                趋势分析
+              </div>
+            </div>
+            <div class="widget-body">
+              <div class="row">
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                  <div class="widget">
+                    <div class="widget-header">
+                      <div class="title">
+                        正片vv排名&nbsp{{end_date}}
+                    <span class="mini-title">
+                    </span>
+                      </div>
+                    </div>
+                    <div class="widget-body">
+                      <div id="program_vid_full_day" style="height: 500px"></div>
+                    </div>
+                  </div>
+
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                  <div class="widget">
+                    <div class="widget-header">
+                      <div class="title">
+                        短片vv排名&nbsp{{end_date}}
+                    <span class="mini-title">
+                    </span>
+                      </div>
+                    </div>
+                    <div class="widget-body">
+                      <div id="program_vid_short_day" style="height: 500px"></div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+
+              <!-- Row End -->
+              <br/>
+          </div>
+
+
+
+        </div>
+        <!-- Dashboard Wrapper End -->
+
+        <footer>
+          <div style="text-align:center"><p>© MGTV hf ltt</p></div>
+        </footer>
+
+      </div>
+    </div>
+    <!-- Main Container end -->
+
+    <script src="{% static 'blue-moon/js/jquery.js' %}"></script>
+    <script src="{% static 'blue-moon/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'blue-moon/js/jquery.scrollUp.js' %}"></script>
+
+    <!-- jQuery UI JS -->
+    <script src="{% static 'blue-moon/js/jquery-ui-v1.10.3.js' %}"></script>
+
+    <!-- Just Gage -->
+    <script src="{% static 'blue-moon/js/justgage/raphael.2.1.0.min.js' %}"></script>
+
+    <!-- Flot Charts -->
+    <script src="{% static 'blue-moon/js/flot/jquery.flot.js' %}"></script>
+    <script src="{% static 'blue-moon/js/flot/jquery.flot.orderBar.min.js' %}"></script>
+    <script src="{% static 'blue-moon/js/flot/jquery.flot.stack.min.js' %}"></script>
+    <script src="{% static 'blue-moon/js/flot/jquery.flot.pie.min.js' %}"></script>
+    <script src="{% static 'blue-moon/js/flot/jquery.flot.tooltip.min.js' %}"></script>
+    <script src="{% static 'blue-moon/js/flot/jquery.flot.resize.min.js' %}"></script>
+
+    <!-- Custom JS -->
+    <script src="{% static 'blue-moon/js/menu.js' %}"></script>
+    <script src="{% static 'blue-moon/js/custom-index2.js' %}"></script>
+    <script src="{% static 'blue-moon/js/echarts.min.js' %}"></script>
+
+      <script>
+
+        //program_vv_uv_day
+        var vv_day_date = {{ vv_day_date|safe }};
+        var vv_day_data = {{ vv_day_data|safe }};
+        var uv_day_data = {{ uv_day_data|safe }};
+
+        //program_uv_terminal_day
+        var uv_terminal_day_dict = {{ uv_terminal_day_dict|safe }};
+
+        //duration_isfull_day
+        var duration_isfull_day_dict = {{ duration_isfull_day_dict|safe }};
+
+        //pt_type_day
+        var pt_type_day_dict = {{ pt_type_day_dict|safe }};
+
+        //vid_isfull_day
+        var vid_isfull_day_dict = {{ vid_isfull_day_dict|safe }};
+
+      </script>
+      <script src="{% static 'js/jquery.js' %}"></script>
+      <script src="{% static 'js/bootstrap.min.js' %}"></script>
+      <script src="{% static 'js/jquery.scrollUp.js' %}"></script>
+      <script src="{% static 'js/main.js' %}"></script>
+
+      <!--ECharts -->
+      <script src="{% static 'js/echarts.min.js' %}"></script>
+      <script src="{% static 'js/program_vv_uv_day.js' %}"></script>
+      <script src="{% static 'js/program_uv_terminal_day.js' %}"></script>
+      <script src="{% static 'js/program_duration_isfull_day.js' %}"></script>
+      <script src="{% static 'js/program_pt_type_day.js' %}"></script>
+      <script src="{% static 'js/program_vid_full_day.js' %}"></script>
+      <script src="{% static 'js/program_vid_short_day.js' %}"></script>
+  </body>
+</html>
