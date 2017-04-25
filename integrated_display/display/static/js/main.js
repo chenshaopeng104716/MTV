@@ -2,7 +2,7 @@
 document.querySelector("[type='date']").onchange= function(){
     var now=new Date();
     var nowDay=now.toLocaleDateString();
-    var selectDay=document.querySelector("#startTime").value;
+    var selectDay=document.querySelector("#search_date").value;
     compareDate(selectDay,nowDay);
 }
 
@@ -17,6 +17,7 @@ function compareDate(selectDay, nowDay) {
         arys2=nowDay.split('/');
         var edate=new Date(arys2[0],parseInt(arys2[1]-1),arys2[2]-1);
         if(sdate > edate) {
+            btn.disabled=true;
             while(btn!=form.lastChild){
                 form.removeChild(form.lastChild);
             }
@@ -25,10 +26,19 @@ function compareDate(selectDay, nowDay) {
             label.className='text-danger';
             form.appendChild(label);
         }
-        else
+        else{
+            btn.disabled=false;
             while(btn!=form.lastChild){
                 form.removeChild(form.lastChild);
-            }
+            }}
+        if(arys1[0]<2017){
+            btn.disabled=true;
+            var label=document.createElement("label");
+            label.innerHTML="请选择2017年后的日期";
+            label.className='text-danger';
+            form.appendChild(label);
+        }
+
     }
 }
 /*******************鼠标移入事件*********************/

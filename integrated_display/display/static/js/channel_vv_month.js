@@ -5,7 +5,8 @@
         var option = {
 
             tooltip: {
-                trigger: 'axis'
+                trigger: 'axis',
+
             },
             legend: {
                 data:['2016','2017']
@@ -35,12 +36,12 @@
             series: [{
                 name: '2016',
                 type: 'bar',
-                data: vv_month_lastyear,
+                data: vv_month_lastyear
                 },
                 {
                 name: '2017',
                 type: 'bar',
-                data: vv_month_thisyear,
+                data: vv_month_thisyear
                 }
                 ]
         };
