@@ -9,4 +9,5 @@ urlpatterns = [
     url(r'^$', views.platform, name='platform'),
     url(r'^channel/$',views.channel,name='channel'),
     url(r'^program/$',views.program,name='program'),
+    url(r'^testindex/$',views.testindex,name='testindex'),
 ]

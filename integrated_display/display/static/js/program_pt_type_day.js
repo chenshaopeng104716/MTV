@@ -16,7 +16,7 @@
                 legend: {
                     x : 'center',
                     y : 'bottom',
-                    data:['pcweb','ott','android','iphone']
+                    data:['0min-1min','1min-15min','15min-30min','30min-1hour','1hour-2hour','>2hour']
                 },
                 toolbox: {
                     show : true,

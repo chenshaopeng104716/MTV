@@ -67,9 +67,12 @@ def platform(request):
     ###查询最近一周的日均uv、日均vv
     uv_pid_day_avg_sql = platform_class.module_search(searchtype='platform_uv_pid_day_avg')###合集日均uvtop20
 
+    ###节目模块li标签top10uv的合集
+    program_li_show_sql = platform_class.module_search(searchtype='program_li_show')
+
     ###合并sql,一次查询
     sql_combine = Newmofang().sql_union(vv_month_sql,vv_day_sql,uv_day_sql,pv_day_sql,duration_day_sql,kpi_platform_sql,vv_terminal_day_sql,uv_terminal_day_sql,
-                                        vv_channel_day_sql,uv_channel_day_sql,dau_platform_day_sql,uv_pid_day_avg_sql)
+                                        vv_channel_day_sql,uv_channel_day_sql,dau_platform_day_sql,uv_pid_day_avg_sql,program_li_show_sql)
     all_result = Newmofang().sql_query(sql_combine)
     ###利用pandas包把all_result分到不同的查询
     vv_month_result = all_result[all_result['module_name']=='platform_vv_month'].sort(['col1'])
@@ -84,6 +87,7 @@ def platform(request):
     uv_channel_day_result = all_result[all_result['module_name'] == 'platform_uv_channel_day'].sort(['col1'])
     dau_platform_day_result = all_result[all_result['module_name'] == 'platform_dau_day'].sort(['col1'])
     uv_pid_day_avg_result = all_result[all_result['module_name'] == 'platform_uv_pid_day_avg']
+    program_li_show_result = all_result[all_result['module_name'] == 'program_li_show']
     pid_list = uv_pid_day_avg_result['col1'].tolist()###获取pid列表
     pid_list_to_str = map(lambda x:str(x),pid_list)
     pid_str = ','.join(pid_list_to_str)###合集id列表，供vv查询用
@@ -103,7 +107,7 @@ def platform(request):
     vv_channel_day_dict = vv_channel_day_process(vv_channel_day_result=vv_channel_day_result,channel_list=channel_list)  ###分频道vv变化
     uv_channel_day_dict = uv_channel_day_process(uv_channel_day_result=uv_channel_day_result,channel_list=channel_list)  ###分频道uv变化
     dau_day_data, uv_ration_day_data = dau_day_process(dau_platform_day_result=dau_platform_day_result,uv_day_result=uv_day_result)
-
+    program_li_show_dict = program_li_show_process(program_li_show_result)
     end_time = time.time()
     print 'time elapse is %s'%(end_time-start_time)
     return render(request, 'platform.html', {'kpi_ratio':kpi_ratio,'vv_day_date':json.dumps(vv_day_date),'vv_day_data':json.dumps(vv_day_data),
@@ -112,7 +116,7 @@ def platform(request):
                                           'vv_terminal_day_dict':vv_terminal_day_dict,'uv_terminal_day_dict':uv_terminal_day_dict,'vv_channel_day_dict':vv_channel_day_dict,
                                        'uv_channel_day_dict':uv_channel_day_dict,'dau_day_data':dau_day_data,'uv_ration_day_data':uv_ration_day_data,
                                         'overview_platform_day_dict':overview_platform_day_dict,'pid_day_avg_result':json.dumps(pid_day_avg_result),
-                                          'date_str':date_str})
+                                          'date_str':date_str,'program_li_show_dict':program_li_show_dict})
 
 ###频道模块
 def channel(request):
@@ -162,9 +166,12 @@ def channel(request):
     ###查询最近一周的日均uv、日均vv
     uv_pid_day_avg_sql = channel_class.module_search(searchtype='channel_uv_pid_day_avg')###合集日均uvtop20
 
+    ###节目模块li标签top10uv的合集
+    program_li_show_sql = channel_class.module_search(searchtype='program_li_show')
+
     ###合并sql,一次查询
     sql_combine = Newmofang().sql_union(vv_month_sql,vv_day_sql,uv_day_sql,duration_day_sql,kpi_channel_sql,vv_terminal_day_sql,uv_terminal_day_sql,
-                                        uv_pid_day_avg_sql,pid_vv_week_ago_sql)
+                                        uv_pid_day_avg_sql,pid_vv_week_ago_sql,program_li_show_sql)
     all_result = Newmofang().sql_query(sql_combine)
 
     ###利用pandas包把all_result分到不同的查询
@@ -177,7 +184,7 @@ def channel(request):
     uv_terminal_day_result = all_result[all_result['module_name'] == 'channel_uv_terminal_day'].sort(['col1'])
     uv_pid_day_avg_result = all_result[all_result['module_name'] == 'channel_uv_pid_day_avg']
     pid_vv_week_ago_result = all_result[all_result['module_name'] == 'channel_pid_vv_change_this']
-
+    program_li_show_result = all_result[all_result['module_name'] == 'program_li_show']
     pid_week_list = pid_vv_week_ago_result['col1'].tolist()
     pid_week_list_to_str = map(lambda x:str(x),pid_week_list)###转化为字符串传入sql
     pid_week_str = ','.join(pid_week_list_to_str)###前一周的合集vvtop中的pid列表
@@ -211,6 +218,7 @@ def channel(request):
     vv_day_date, vv_day_data, uv_day_data = vv_day_process(vv_day_result=vv_day_result,uv_day_result=uv_day_result)###全平台日vv、uv数据
     vv_terminal_day_dict = vv_terminal_day_process(vv_terminal_day_result=vv_terminal_day_result,terminal_list=terminal_list)  ###分端vv变化
     uv_terminal_day_dict = uv_terminal_day_process(uv_terminal_day_result=uv_terminal_day_result,terminal_list=terminal_list)  ###分端uv变化
+    program_li_show_dict = program_li_show_process(program_li_show_result)###节目模块合集标签
     end_time = time.time()
     print 'time elapse is %s'%(end_time-start_time)
     return render(request,'channel.html',{'path':path,'vv_month_date':json.dumps(vv_month_date),'vv_month_lastyear':json.dumps(vv_month_lastyear),'channel_name_eng':channel_name_eng,
@@ -218,16 +226,21 @@ def channel(request):
                                         'kpi_ratio':kpi_ratio,'overview_channel_day_dict':overview_channel_day_dict,'channel_name_div':[channel_dict[channel_name]],
                                           'vv_day_data': json.dumps(vv_day_data),'uv_day_data':json.dumps(uv_day_data),'vv_day_date':json.dumps(vv_day_date),
                                           'vv_terminal_day_dict': vv_terminal_day_dict,'uv_terminal_day_dict': uv_terminal_day_dict,
-                                          'pid_day_avg_result': json.dumps(pid_day_avg_result),'pid_vv_change_dict':json.dumps(pid_vv_change_dict),})
+                                          'pid_day_avg_result': json.dumps(pid_day_avg_result),'pid_vv_change_dict':json.dumps(pid_vv_change_dict),
+                                          'program_li_show_dict':program_li_show_dict,})
+
 ###节目模块
 def program(request):
     start_time = time.time()
     path = request.get_full_path()
+    program_id = request.GET.get('id')###获取url中传过来的参数
     if request.method == 'GET':
-        program_id = request.GET.get('id')###获取url中传过来的参数
-        calculate_day = datetime.datetime.now() - datetime.timedelta(days=1)
+        calculate_date = datetime.datetime.now() - datetime.timedelta(days=1)
+    elif request.method == 'POST':
+        post_date = request.POST.get('search_date')###获取post表单中的参数
+        calculate_date = datetime.datetime.strptime(post_date, "%Y-%m-%d")
     start_date, end_date, end_date_show, last_week_start_date, last_week_end_date, \
-    last_2week_start_date, last_2week_end_date, month_to_month_date,year_to_year_date,date_str = date_calculate(calculate_day)
+    last_2week_start_date, last_2week_end_date, month_to_month_date,year_to_year_date,date_str = date_calculate(calculate_date)
 
     ###初始类
     program_class = Newmofang(pid=program_id, start_date=start_date, end_date=end_date,
@@ -250,8 +263,10 @@ def program(request):
     duration_isfull_day_sql = program_class.module_search(searchtype='program_duration_isfull_day')
     pt_type_day_sql = program_class.module_search(searchtype='program_pt_type_day')
     vid_isfull_day_sql = Newmofang(start_date=start_date, end_date=end_date,vid_str=vid_str).module_search(searchtype='program_vid_isfull_day')
+    ###节目模块li标签top10uv的合集
+    program_li_show_sql = program_class.module_search(searchtype='program_li_show')
     ###合并sql,一次查询
-    sql_combine = program_class.sql_union(vv_day_sql,uv_day_sql,uv_terminal_day_sql,duration_isfull_day_sql,pt_type_day_sql,vid_isfull_day_sql)
+    sql_combine = program_class.sql_union(vv_day_sql,uv_day_sql,uv_terminal_day_sql,duration_isfull_day_sql,pt_type_day_sql,vid_isfull_day_sql,program_li_show_sql)
     all_result = program_class.sql_query(sql_combine)
 
     ###利用pandas包把all_result分到不同的查询
@@ -261,15 +276,23 @@ def program(request):
     duration_isfull_day_result = all_result[all_result['module_name']=='program_duration_isfull_day'].sort(['col1'])
     pt_type_day_result = all_result[all_result['module_name'] == 'program_pt_type_day']
     vid_isfull_day_result = all_result[all_result['module_name'] == 'program_vid_isfull_day']
+    program_li_show_result = all_result[all_result['module_name'] == 'program_li_show']
 
     vv_day_date, vv_day_data, uv_day_data = vv_day_process(vv_day_result=vv_day_result,uv_day_result=uv_day_result)  ###全平台日vv、uv数据
     uv_terminal_day_dict = program_uv_terminal_day_process(uv_terminal_day_result=uv_terminal_day_result,terminal_list=terminal_list)  ###分端uv变化
     duration_isfull_day_dict = program_duration_isfull_day_process(duration_isfull_day_result)
     pt_type_day_dict = program_pt_type_day_process(pt_type_day_result)
     vid_isfull_day_dict = program_vid_isfull_day_process(vid_isfull_day_result,cms_result)
+    program_li_show_dict = program_li_show_process(program_li_show_result)  ###节目模块合集标签
 
     end_time = time.time()
     print 'time elapse is %s'%(end_time-start_time)
     return render(request,'program.html',{'path':path,'vv_day_data': json.dumps(vv_day_data),'uv_day_data':json.dumps(uv_day_data),'vv_day_date':json.dumps(vv_day_date)
                                         ,'program_name':program_name,'uv_terminal_day_dict':uv_terminal_day_dict,'duration_isfull_day_dict':duration_isfull_day_dict,
-                                          'vid_isfull_day_dict':json.dumps(vid_isfull_day_dict),'pt_type_day_dict':pt_type_day_dict,'end_date':end_date})
+                                          'vid_isfull_day_dict':json.dumps(vid_isfull_day_dict),'pt_type_day_dict':pt_type_day_dict,'end_date':end_date,
+                                          'program_li_show_dict':program_li_show_dict,'program_id':program_id},)
+
+
+
+def testindex(request):
+    return render(request,'index333.html')

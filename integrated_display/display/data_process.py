@@ -322,6 +322,16 @@ def dau_day_process(dau_platform_day_result,uv_day_result):
     ration_list = data_all['uv_ration'].tolist()
     return dau_list,ration_list
 
+###节目模块li标签top10uv
+def program_li_show_process(program_li_show_result):
+    pid_list = program_li_show_result['col1'].tolist()###获取top10的pid
+    pid_list_to_str = map(lambda x:str(x),pid_list)###格式转换
+    pid_str = ','.join(pid_list_to_str)###合集id列表，供媒资查询合集名称用
+    cms_result = Newmofang(pid_str=pid_str).cms_sql(cms_type='search_pid_name')###查询媒资信息(合集id,合集名称)
+    cms_list_result = map(lambda x,y:{x:y},cms_result['pid_title'],cms_result['pid'])###转化为列表
+    cms_dict_result = reduce(lambda x,y:dict(x,**y),cms_list_result)###转化为字典
+    return cms_dict_result
+
 ###节目模块日正短片vv
 def program_duration_isfull_day_process(duration_isfull_day_result):
     duration_isfull_day_dict = dict()###返回的数据字典，数据格式为：  {正片：[列表1],短片：[列表2]}

@@ -29,6 +29,7 @@ class Newmofang(object):
 
                             'program_vv_day':'vv_pid_day','program_uv_day':'pid_uv_day','program_uv_terminal_day':'pid_uv_day','program_duration_terminal_day':'pt_pid_day',
                             'program_duration_isfull_day':'vv_pid_isfull_day','program_pt_type_day':'pt_pid_day','program_vid_isfull_day':'vv_vid_day',
+                            'program_li_show':'pid_uv_day',
                             }
         ###查询对应模块所用类内部函数
         self.func_dict = {"platform_kpi":self.platform_kpi,"platform_vv_month": self.platform_vv_month,"platform_vv_day": self.platform_vv_day,"platform_pv_day":self.platform_pv_day,"platform_uv_day": self.platform_uv_day,
@@ -40,7 +41,8 @@ class Newmofang(object):
                           "channel_uv_pid_day_avg":self.channel_uv_pid_day_avg,"channel_vv_pid_day_avg":self.channel_vv_pid_day_avg,"channel_pid_vv_change":self.channel_pid_vv_change,
 
                           "program_vv_day":self.program_vv_day,"program_uv_day":self.program_uv_day,"program_uv_terminal_day":self.program_uv_terminal_day,"program_duration_terminal_day":self.program_duration_terminal_day,
-                          "program_duration_isfull_day":self.program_duration_isfull_day,"program_pt_type_day":self.program_pt_type_day,"program_vid_isfull_day":self.program_vid_isfull_day
+                          "program_duration_isfull_day":self.program_duration_isfull_day,"program_pt_type_day":self.program_pt_type_day,"program_vid_isfull_day":self.program_vid_isfull_day,
+                          "program_li_show":self.program_li_show,
                           }
         ###魔方数据库中bid对应的终端
         self.bid_dict = {"1":"ott","102":"pcweb","104":"phonem","5":"padweb","6":"macclient","7":"win10client","8":"pcclient","9":"android","10":"apad","11":"ipad","12":"iphone","13":"mui"}
@@ -55,7 +57,7 @@ class Newmofang(object):
         ###频道模块不同的频道名称对应在魔方数据库中的cid,注意：mpp和ott的频道id不一样
         self.newmofang_cid_dict = {'show':'1,87','tv':'2,83','movie':'3,84','cartoon':'7,88'}
         try:###初始化数据库连接
-            self.conn = psycopg2.connect(database="dm_result", user="editer_readonly", password="SwENoiWo#)Wiu882slw",
+            self.conn = psycopg2.connect(database="dm_result", user="editanalyse_readonly", password="298dkl92Tusb_34lsji@DW",
                                     host="10.100.5.85", port="2345")
             self.cursor = self.conn.cursor()
         except psycopg2.OperationalError:
@@ -325,6 +327,13 @@ class Newmofang(object):
                 start_time=self.end_date,end_time=self.end_date,bid_not_in=self.bid_not_in,vid_str=self.vid_str)
         return sql
 
+    ###节目模块top10  uv的标签
+    def program_li_show(self,table):
+        sql = "(select pid as col1,'null' as col2,'null' as col3,'null' as col4,'null' as col5,sum(uv) as num,'program_li_show' as module_name " \
+              "from {table} where date>='{start_time}' and date<='{end_time}' and {bid_not_in} group by col1 order by num desc limit 10)".format(table=table,
+                start_time=self.last_week_start_date,end_time=self.last_week_end_date,bid_not_in=self.bid_not_in)
+        return sql
+
     def bid_sql(self):###构造bid sql
         sql = 'case bid '
         for bid in self.bid_dict.keys():
@@ -366,8 +375,8 @@ if __name__ == '__main__':
     # print newmofang(searchtype='vv_platform_month').sql_query()
     # print newmofang(searchtype='vv_platform_day',start_date='20170301',end_date='20170307').sql_query()
     # print newmofang(searchtype='vv_terminal_day', start_date='20170301', end_date='20170307').sql_query()
-    pp = Newmofang(start_date='20170401',end_date='20170420',vid_str='3132269')
-    aa = pp.module_search(searchtype='program_vid_isfull_day')
+    pp = Newmofang(last_week_start_date='20170417',last_week_end_date='20170423',vid_str='3132269')
+    aa = pp.module_search(searchtype='program_li_show')
     result = pp.sql_query(aa)
     print result
     # print pp.sql_query(aa)

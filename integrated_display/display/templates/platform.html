@@ -54,16 +54,25 @@
               </ul>
             </li>
             <li class=''>
-              <a href='/display/program?id=312654'><i class="fa fa-caret-square-o-right"></i>
+              <a href='#'><i class="fa fa-caret-square-o-right"></i>
                 <!--<div class="mini-widget" data-tip='即将上线 敬请期待'>-->
                 节目
-                </div>
+                <!--</div>-->
               </a>
-              <!--<ul>-->
-                 <!--<li><a href='flot.html'>Flot Graphs</a></li>-->
-                 <!--<li><a href='graphs.html'>Google Graph</a></li>-->
-                 <!--<li><a href='vector-maps.html'>Vector Maps</a></li>-->
-              <!--</ul>-->
+              <ul>
+                <!--<li><form class="form-inline">-->
+                  <!--<div class="form-group">-->
+                    <!--<input type="email" class="form-control" id="exampleInputEmail2" placeholder="输入查找节目">-->
+                  <!--</div>-->
+                  <!--<button type="submit" class="btn btn-default">搜索</button>-->
+                <!--</form></li>-->
+                {% for key,value in program_li_show_dict.items %}
+                <li><a href='/display/program?id={{value}}'>{{key}}</a></li>
+                {% endfor %}
+                <!--<li class="moreProgram">-->
+                  <!--<a>更多</a>-->
+                <!--</li>-->
+              </ul>
             </li>
 
           </ul>
@@ -446,6 +455,7 @@
 
         //platform_vv_uv_program
         var pid_day_avg_result_list = {{ pid_day_avg_result|safe }};
+
 
       </script>
       <script src="{% static 'js/jquery.js' %}"></script>

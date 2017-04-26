@@ -64,11 +64,20 @@
                 节目
                 <!--</div>-->
               </a>
-              <!--<ul>-->
-                 <!--<li><a href='flot.html'>Flot Graphs</a></li>-->
-                 <!--<li><a href='graphs.html'>Google Graph</a></li>-->
-                 <!--<li><a href='vector-maps.html'>Vector Maps</a></li>-->
-              <!--</ul>-->
+              <ul>
+                <!--<li><form class="form-inline">-->
+                  <!--<div class="form-group">-->
+                    <!--<input type="email" class="form-control" id="exampleInputEmail2" placeholder="输入查找节目">-->
+                  <!--</div>-->
+                  <!--<button type="submit" class="btn btn-default">搜索</button>-->
+                <!--</form></li>-->
+                {% for key,value in program_li_show_dict.items %}
+                <li><a href='/display/program?id={{value}}'>{{key}}</a></li>
+                {% endfor %}
+                <!--<li class="moreProgram">-->
+                  <!--<a>更多</a>-->
+                <!--</li>-->
+              </ul>
             </li>
 
           </ul>
@@ -84,10 +93,23 @@
         <div class="dashboard-wrapper-lg">
           <!-- Row Start -->
           <div class="widget">
+
             <div class="wedger-header-blue">
+              <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
               <div style="font-size: 24px;font-weight: bold;color:#000;">
                 {{program_name}}
               </div>
+            </div>
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                  <form class="form-inline" action="/display/program/?id={{program_id}}"  method="post" role="form">
+                    {% csrf_token %}
+                    <div class="form-group">
+                      <label for="search_date" style="font-size: 14px">日期：</label>
+                      <input type="date" class="form-control" id="search_date" name="search_date" placeholder="开始时间">
+                    </div>
+                                        <button type="submit" class="btn btn-default">查询</button>
+                  </form>
+                </div>
             </div>
             <div class="widget-body">
               <div class="row">
