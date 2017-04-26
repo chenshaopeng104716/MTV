@@ -40,7 +40,7 @@
                 series : [
                     {
                         name:'短片vv',
-                        itemStyle:{  normal:{color:'green'}  } ,
+                        itemStyle:{  normal:{color:'#d3716e'}  } ,
                         type:'bar',
                         label: {
                             normal: {
