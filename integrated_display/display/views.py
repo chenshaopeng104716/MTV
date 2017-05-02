@@ -74,6 +74,7 @@ def platform(request):
     sql_combine = Newmofang().sql_union(vv_month_sql,vv_day_sql,uv_day_sql,pv_day_sql,duration_day_sql,kpi_platform_sql,vv_terminal_day_sql,uv_terminal_day_sql,
                                         vv_channel_day_sql,uv_channel_day_sql,dau_platform_day_sql,uv_pid_day_avg_sql,program_li_show_sql)
     all_result = Newmofang().sql_query(sql_combine)
+
     ###利用pandas包把all_result分到不同的查询
     vv_month_result = all_result[all_result['module_name']=='platform_vv_month'].sort(['col1'])
     vv_day_result = all_result[all_result['module_name']=='platform_vv_day'].sort(['col1'])

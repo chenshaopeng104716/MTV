@@ -3,6 +3,7 @@
 import time
 import datetime
 import pandas as pd
+import numpy as np
 from SQLclass import *
 
 
@@ -165,6 +166,8 @@ def channel_pid_vv_change_process(pid_week_str,pid_vv_week_ago_result,pid_vv_2we
     dataframe_all = pd.merge(cms_result,vv_week_ago_result,how='inner',on='pid')
     dataframe_all = pd.merge(dataframe_all,vv_2week_ago_result,how='inner',on='pid')
     dataframe_all['vv_diff'] = map(lambda x,y:round(100*(x-y)/y),dataframe_all['vv_week_ago'],dataframe_all['vv_2week_ago'])
+    dataframe_all = dataframe_all[dataframe_all['vv_diff'] != np.inf]###过滤掉正无穷
+    dataframe_all = dataframe_all[dataframe_all['vv_diff'] != -np.inf]  ###过滤掉负无穷
    ###针对两周vv的差值百分比进行排序
     dataframe_all = dataframe_all.sort('vv_diff')
     ###涨幅部分
