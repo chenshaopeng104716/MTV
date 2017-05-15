@@ -25,12 +25,14 @@
                     saveAsImage: {}
                   }
                 },
-                grid: {
-                    left: '3%',
-                    right: '4%',
-                    bottom: '3%',
-                    containLabel: true
-                },
+                dataZoom: [{
+                    type: 'inside',
+                    start: 70,
+                    end: 100
+                }, {
+                    start: 70,
+                    end: 100,
+                }],
                 xAxis : [
                     {
                         type : 'category',
@@ -44,6 +46,10 @@
                 yAxis : [
                     {
                         type : 'value',
+                        axisLabel:{
+                        formatter:function(value){
+                        return value+'万'
+                        }},
                         splitLine: {
                             show: false
                         }

@@ -1,16 +1,27 @@
 #coding:utf-8
 from django.contrib import admin
-from .models import Modules
+from .models import Authority,User
 # Register your models here.
 import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
 
 
-###模块表
-class ModulesAdmin(admin.ModelAdmin):
-    fieldsets = [('Modules information', {'fields': ('module_ID', 'module_Name')}), ]
-    list_display = ('module_ID', 'module_Name')
+####注册权限信息
+class  AuthorityAdmin(admin.ModelAdmin):
+    fieldsets = [('Authority information', {'fields': ('authorityID', 'authorityname')}), ]
+    list_display = ('authorityID', 'authorityname')
+
+##注册用户信息
+class UserAdmin(admin.ModelAdmin):
+    fieldsets = [('user information',{'fields':('username','password','authorityID')}),]
+    list_display = ('username','password','authorityID')
+    ordering = ('authorityID',)
+
+# ###模块表
+# class ModulesAdmin(admin.ModelAdmin):
+#     fieldsets = [('Modules information', {'fields': ('module_ID', 'module_Name','module_qq ')}), ]
+#     list_display = ('module_ID', 'module_Name','module_qq ')
 # ###表单汇总表
 # class TablesAdmin(admin.ModelAdmin):
 #     fieldsets = [('Tables information', {'fields': ('module_ID', 'table_ID','table_Name','notes')}), ]
@@ -28,7 +39,9 @@ class ModulesAdmin(admin.ModelAdmin):
 #
 #
 #
-admin.site.register(Modules,ModulesAdmin)
+admin.site.register(Authority, AuthorityAdmin)
+admin.site.register(User, UserAdmin)
+# admin.site.register(Modules,ModulesAdmin)
 # admin.site.register(Tables,TablesAdmin)
 # admin.site.register(Labels,LabelsAdmin)
 # admin.site.register(Platform_summary_day,Platform_summary_dayAdmin)

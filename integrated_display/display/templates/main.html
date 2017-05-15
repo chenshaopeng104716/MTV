@@ -1,0 +1,118 @@
+{% load  staticfiles %}
+<html>
+  <head>
+    <title>运营分析可视化平台(Beta)</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Blue Moon - Responsive Admin Dashboard" />
+    <meta name="keywords" content="Notifications, Admin, Dashboard, Bootstrap3, Sass, transform, CSS3, HTML5, Web design, UI Design, Responsive Dashboard, Responsive Admin, Admin Theme, Best Admin UI, Bootstrap Theme, Wrapbootstrap, Bootstrap, bootstrap.gallery" />
+    <meta name="author" content="Bootstrap Gallery" />
+    <link rel="shortcut icon" href="{% static 'img/favicon.ico' %}">
+    <link href="{% static 'blue-moon/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'blue-moon/css/new.css' %}" rel="stylesheet">
+    <link href="{% static 'css/new.css' %}" rel="stylesheet">
+    <link href="{% static 'blue-moon/css/charts-graphs.css' %}" rel="stylesheet">
+     <link href="{% static 'css/authority_control.css' %}" rel="stylesheet">
+    <link href="{% static 'css/toastr.css' %}" rel="stylesheet">
+    <!-- Datepicker CSS -->
+    <link rel="stylesheet" type="text/css" href="{% static 'blue-moon/css/datepicker.css' %}">
+    <link href="{% static 'blue-moon/fonts/font-awesome.min.css' %}" rel="stylesheet">
+       <script src="{% static 'js/jquery.js' %}"></script>
+      <script src="{% static 'js/bootstrap.min.js' %}"></script>
+      <script src="{% static 'js/jquery.scrollUp.js' %}"></script>
+      <script src="{% static 'js/main.js' %}"></script>
+      <!--权限提醒，权限控制，节目查询-->
+      <script src="{% static 'js/toastr.js' %}"></script>
+      <script src="{% static 'js/authority_control.js' %}"></script>
+      <script src="{% static 'js/query_program.js' %}"></script>
+      <script src="{% static 'js/base_loading.js' %}"></script>
+</head>
+<!-- Header Start -->
+<body style="background-color: white" >
+    <header style="background-color: black">
+      <h2 style="color:#fff;width:600px;float:left;font-family: 'Microsoft YaHei';margin: 7px 0 0 0;line-height: 50px"><img src="{% static 'images/MTV.png' %}"/><span style="margin-left:5px;vertical-align: bottom">运营分析可视化平台(Beta)</span></h2>
+                     <a style="float:right;color: white;font-size: 20px;" href="/display/logout"><i class="glyphicon glyphicon-off"></i>退出</a>
+                     <span style="float:right;color: white;font-size: 15px;">权限:{{authority}}&nbsp;&nbsp;&nbsp;&nbsp;</span>
+      </header>
+    <div class="dashboard-container"  style="background-color: black;margin:0;border:0;padding:0">
+      <div class="container" >
+        <!-- Top Nav Start -->
+        <div id='cssmenu'>
+          <ul>
+            <li class='active'>
+              <a id="allplatform" href='/display/platform'><i class="fa fa-dashboard"></i><span >全平台</span>
+              </a>
+            </li>
+            <li id="channel_list">
+              <a href="#">
+                <i class="fa fa-bar-chart-o"></i>频道</a>
+              <ul>
+                 <li><a  id="show" name="channel" href="/display/channel?name=show">综艺</a></li>
+                 <li><a  id="tv" name="channel" href="/display/channel?name=tv">电视剧</a></li>
+                 <li><a  id="movie" name="channel" href="/display/channel?name=movie">电影</a></li>
+                 <li><a  id="cartoon" name="channel" href="/display/channel?name=cartoon">动漫</a></li>
+              </ul>
+            </li>
+            <li class=''>
+              <a href='#'><i class="fa fa-caret-square-o-right"></i>
+                <!--<div class="mini-widget" data-tip='即将上线 敬请期待'>-->
+                节目
+
+
+                <!--</div>-->
+              </a>
+              <ul>
+                 <li id="search_result_location">
+                   <!--<form class="form-inline" action="/display/program?" >-->
+                  {% csrf_token %}
+                  <div class="form-group" id="search">
+                    <input type="text" autocomplete="off" class="form-control" id="search-text" placeholder="输入查找的节目">
+                  </div>
+
+                <!--</form>-->
+                 </li>
+                <!--<li><form class="form-inline">-->
+                  <!--<div class="form-group">-->
+                    <!--<input type="email" class="form-control" id="exampleInputEmail2" placeholder="输入查找节目">-->
+                  <!--</div>-->
+                  <!--<button type="submit" class="btn btn-default">搜索</button>-->
+                <!--</form></li>-->
+                {% for key,value in program_li_show_dict.items %}
+                <li name="program_list_ago"><a href='/display/program?id={{value}}'>{{key}}</a></li>
+                {% endfor %}
+                <!--<li class="moreProgram">-->
+                  <!--<a>更多</a>-->
+                <!--</li>-->
+              </ul>
+            </li>
+
+
+          </ul>
+
+             <!-- Top Nav End -->
+
+
+        <!-- Sub Nav End -->
+         </div>
+
+        <input type="hidden" id="authority" name="field＿name" value="{{authority}}">
+             </div>
+            </div>
+             <div style="margin-top: 5%;margin-left:100px;text-align: left;">
+                 <h2>请点击右上角具体模块进行数据查询</h2>
+                 <br><br><br><br>
+             <h3>更新时间：</h3>
+                 <br>
+              <h4>2017.5.12</h4>
+                 <br><br>
+              <h3>更新功能：</h3>
+                 <br>
+              <h4>新增全平台、频道模块合集vv、uv气泡图日、周查询功能。</h4>
+                 <br><br>
+                <h3> Tips：</h3>
+                 <br>
+               <h4>相关使用、Bug问题请联系运营分析部-何方，谢谢。</h4>
+
+               </div>
+</body>
+</html>

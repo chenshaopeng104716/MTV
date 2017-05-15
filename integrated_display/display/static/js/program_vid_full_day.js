@@ -8,7 +8,8 @@
                     trigger: 'axis',
                     axisPointer : {            // 坐标轴指示器，坐标轴触发有效
                         type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
-                    }
+                    },
+                    formatter:'{c}万'
                 },
                 legend: {
                     data:['正片vv']
@@ -44,7 +45,8 @@
                         label: {
                             normal: {
                                 show: true,
-                                position: 'right'
+                                position: 'right',
+                                formatter: '{c}万'
                             }
                         },
                         data:vid_isfull_day_dict.full_num
@@ -55,4 +57,4 @@
             myChart.setOption(option);
             window.onresize = myChart.resize;
           }
-      program_vid_full_day();
+     // program_vid_full_day();

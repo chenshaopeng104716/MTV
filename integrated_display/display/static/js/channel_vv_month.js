@@ -29,6 +29,10 @@
                 },
             ],
             yAxis: {
+                    axisLabel:{
+                    formatter:function(value){
+                    return value+'万'
+                    }},
                     splitLine: {
                         show: false
                     }

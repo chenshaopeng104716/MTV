@@ -1,0 +1,56 @@
+{% load  staticfiles %}
+<html>
+<head>
+     <title>运营分析可视化平台(Beta)</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Blue Moon - Responsive Admin Dashboard" />
+    <meta name="keywords" content="数据，分析数据，数据可视化，图表分析" />
+    <meta name="author" content="hefang&liufutao" />
+    <link href="{% static 'img/favicon.ico' %}" rel="shortcut icon" >
+    <link href="{% static 'blue-moon/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/login.css' %}" rel="stylesheet">
+	<link href="{% static 'css/toastr.css' %}" rel="stylesheet">
+</head>
+<body>
+	<h1 align="center" ><span class="title_content" >运营分析可视化平台(Beta)</span></h1>
+		<div align="center"><img src="{% static 'images/mgtvlogo2.jpg' %}"></div>
+		<div class="login-box">
+			<div class="login-title text-center">
+				<h1><small>登录</small></h1>
+			</div>
+			<div class="login-content ">
+				<div class="col-xs-4 col-xs-offset-4">  {% if error_message %}<p style="color: red" id="error_message"><strong>{{ error_message }}</strong></p>{% endif %}</div>
+			<div class="form">
+			<form action="/display/"  method="post" id="login_form">
+                {% csrf_token %}
+					<div class="col-xs-12  ">
+						<div class="input-group">
+							<span class="input-group-addon"><span class="glyphicon glyphicon-user"></span></span>
+							<input type="text" id="username" name="username" class="form-control" placeholder="用户名" >
+						</div>
+					</div>
+					<div class="col-xs-12  ">
+						<div class="input-group">
+							<span class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></span>
+							<input type="text" id="password" name="password" class="form-control" placeholder="密码"  >
+						</div>
+					</div>
+					<div class="col-xs-4 col-xs-offset-4 ">
+						<button type="submit"  id="bt_login" class="btn btn-sm btn-info"><span class="glyphicon glyphicon-off"></span> 登录</button>
+					</div>
+			</form>
+			</div>
+		</div>
+	</div>
+
+
+      <script src="{% static 'js/jquery.js' %}"></script>
+      <script src="{% static 'js/bootstrap.min.js' %}"></script>
+      <script src="{% static 'js/jquery.scrollUp.js' %}"></script>
+      <script src="{% static 'js/main.js' %}"></script>
+      <script src="{% static 'js/toastr.js' %}"></script>
+        <script src="{% static 'js/login_validate.js' %}"></script>
+</body>
+
+</html>

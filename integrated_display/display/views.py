@@ -1,6 +1,6 @@
 #coding:utf-8
 from django.shortcuts import render,redirect,get_object_or_404,render_to_response
-from .models import *
+from .models import User,Authority
 from django.http import  HttpResponseRedirect,HttpResponse
 from django.db import connection
 from data_process import *
@@ -17,10 +17,36 @@ import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
 
-
+###登录验证
+def login(request):
+    if request.method == 'GET':
+        return render(request,'login.html',{})
+    elif request.method == 'POST':
+        username= str(request.POST.get('username', ''))
+        password=str(request.POST.get('password', ''))
+        print username,password
+        try:
+            user = User.objects.get(username=username, password=password)
+            print "此用户存在"
+            authority = user.authorityID.authorityname
+            request.session['user_authority'] =authority
+            request.session.set_expiry(0)
+            print "权限;",authority
+            program_li_show_dict=get_top_10_list()
+            # if authority=="全平台":
+            return render(request,'main.html',{'authority':authority,'program_li_show_dict':program_li_show_dict})
+                # return HttpResponseRedirect("/display/platform")
+            # else:
+            #     return render(request, 'main.html', {})
+                # return HttpResponseRedirect("/display/channel")
+        except User.DoesNotExist:
+            print "此用户不存在"
+            return render(request,'login.html',{'error_message': "用户名或者密码错误"})
+            # return HttpResponseRedirect("/display/")
 ###全平台模块
 def platform(request):
     start_time = time.time()
+    authority = str(request.session['user_authority'])
     if request.method == 'GET':
         calculate_date = datetime.datetime.now()-datetime.timedelta(days=1)
     elif request.method == 'POST':
@@ -67,12 +93,12 @@ def platform(request):
     ###查询最近一周的日均uv、日均vv
     uv_pid_day_avg_sql = platform_class.module_search(searchtype='platform_uv_pid_day_avg')###合集日均uvtop20
 
-    ###节目模块li标签top10uv的合集
-    program_li_show_sql = platform_class.module_search(searchtype='program_li_show')
+    # ###节目模块li标签top10uv的合集
+    # program_li_show_sql = platform_class.module_search(searchtype='program_li_show')
 
     ###合并sql,一次查询
     sql_combine = Newmofang().sql_union(vv_month_sql,vv_day_sql,uv_day_sql,pv_day_sql,duration_day_sql,kpi_platform_sql,vv_terminal_day_sql,uv_terminal_day_sql,
-                                        vv_channel_day_sql,uv_channel_day_sql,dau_platform_day_sql,uv_pid_day_avg_sql,program_li_show_sql)
+                                        vv_channel_day_sql,uv_channel_day_sql,dau_platform_day_sql,uv_pid_day_avg_sql)
     all_result = Newmofang().sql_query(sql_combine)
 
     ###利用pandas包把all_result分到不同的查询
@@ -88,7 +114,7 @@ def platform(request):
     uv_channel_day_result = all_result[all_result['module_name'] == 'platform_uv_channel_day'].sort(['col1'])
     dau_platform_day_result = all_result[all_result['module_name'] == 'platform_dau_day'].sort(['col1'])
     uv_pid_day_avg_result = all_result[all_result['module_name'] == 'platform_uv_pid_day_avg']
-    program_li_show_result = all_result[all_result['module_name'] == 'program_li_show']
+    # program_li_show_result = all_result[all_result['module_name'] == 'program_li_show']
     pid_list = uv_pid_day_avg_result['col1'].tolist()###获取pid列表
     pid_list_to_str = map(lambda x:str(x),pid_list)
     pid_str = ','.join(pid_list_to_str)###合集id列表，供vv查询用
@@ -108,7 +134,9 @@ def platform(request):
     vv_channel_day_dict = vv_channel_day_process(vv_channel_day_result=vv_channel_day_result,channel_list=channel_list)  ###分频道vv变化
     uv_channel_day_dict = uv_channel_day_process(uv_channel_day_result=uv_channel_day_result,channel_list=channel_list)  ###分频道uv变化
     dau_day_data, uv_ration_day_data = dau_day_process(dau_platform_day_result=dau_platform_day_result,uv_day_result=uv_day_result)
-    program_li_show_dict = program_li_show_process(program_li_show_result)
+    ##调用方法获取本地数据库存储的top10节目列表
+    program_li_show_dict=get_top_10_list()
+    # program_li_show_dict = program_li_show_process(program_li_show_result)
     end_time = time.time()
     print 'time elapse is %s'%(end_time-start_time)
     return render(request, 'platform.html', {'kpi_ratio':kpi_ratio,'vv_day_date':json.dumps(vv_day_date),'vv_day_data':json.dumps(vv_day_data),
@@ -117,14 +145,20 @@ def platform(request):
                                           'vv_terminal_day_dict':vv_terminal_day_dict,'uv_terminal_day_dict':uv_terminal_day_dict,'vv_channel_day_dict':vv_channel_day_dict,
                                        'uv_channel_day_dict':uv_channel_day_dict,'dau_day_data':dau_day_data,'uv_ration_day_data':uv_ration_day_data,
                                         'overview_platform_day_dict':overview_platform_day_dict,'pid_day_avg_result':json.dumps(pid_day_avg_result),
-                                          'date_str':date_str,'program_li_show_dict':program_li_show_dict})
+                                          'date_str':date_str,'program_li_show_dict':program_li_show_dict,'authority':authority})
 
 ###频道模块
 def channel(request):
     start_time = time.time()
+    authority = str(request.session['user_authority'])
     path = request.get_full_path()
     channel_dict = {'show':'综艺','tv':'电视剧','movie':'电影','cartoon':'动漫'}
-    channel_name = request.GET.get('name')###获取url中传过来的参数
+    channel_dict_reverse = { '综艺':'show','电视剧':'tv','电影': 'movie','动漫':'cartoon'}
+    if(request.GET.get('name')):
+        channel_name = request.GET.get('name')###获取url中传过来的参数
+    else:
+        channel_name=channel_dict_reverse[authority]
+        print channel_name
     channel_name_eng = channel_name###后续post需要该参数
     if request.method == 'GET':
         calculate_date = datetime.datetime.now() - datetime.timedelta(days=1)
@@ -167,12 +201,12 @@ def channel(request):
     ###查询最近一周的日均uv、日均vv
     uv_pid_day_avg_sql = channel_class.module_search(searchtype='channel_uv_pid_day_avg')###合集日均uvtop20
 
-    ###节目模块li标签top10uv的合集
-    program_li_show_sql = channel_class.module_search(searchtype='program_li_show')
+    # ###节目模块li标签top10uv的合集
+    # program_li_show_sql = channel_class.module_search(searchtype='program_li_show')
 
     ###合并sql,一次查询
     sql_combine = Newmofang().sql_union(vv_month_sql,vv_day_sql,uv_day_sql,duration_day_sql,kpi_channel_sql,vv_terminal_day_sql,uv_terminal_day_sql,
-                                        uv_pid_day_avg_sql,pid_vv_week_ago_sql,program_li_show_sql)
+                                        uv_pid_day_avg_sql,pid_vv_week_ago_sql)
     all_result = Newmofang().sql_query(sql_combine)
 
     ###利用pandas包把all_result分到不同的查询
@@ -185,7 +219,7 @@ def channel(request):
     uv_terminal_day_result = all_result[all_result['module_name'] == 'channel_uv_terminal_day'].sort(['col1'])
     uv_pid_day_avg_result = all_result[all_result['module_name'] == 'channel_uv_pid_day_avg']
     pid_vv_week_ago_result = all_result[all_result['module_name'] == 'channel_pid_vv_change_this']
-    program_li_show_result = all_result[all_result['module_name'] == 'program_li_show']
+    # program_li_show_result = all_result[all_result['module_name'] == 'program_li_show']
     pid_week_list = pid_vv_week_ago_result['col1'].tolist()
     pid_week_list_to_str = map(lambda x:str(x),pid_week_list)###转化为字符串传入sql
     pid_week_str = ','.join(pid_week_list_to_str)###前一周的合集vvtop中的pid列表
@@ -219,7 +253,9 @@ def channel(request):
     vv_day_date, vv_day_data, uv_day_data = vv_day_process(vv_day_result=vv_day_result,uv_day_result=uv_day_result)###全平台日vv、uv数据
     vv_terminal_day_dict = vv_terminal_day_process(vv_terminal_day_result=vv_terminal_day_result,terminal_list=terminal_list)  ###分端vv变化
     uv_terminal_day_dict = uv_terminal_day_process(uv_terminal_day_result=uv_terminal_day_result,terminal_list=terminal_list)  ###分端uv变化
-    program_li_show_dict = program_li_show_process(program_li_show_result)###节目模块合集标签
+    # program_li_show_dict = program_li_show_process(program_li_show_result)###节目模块合集标签
+    ##调用方法获取本地数据库存储的top10节目列表
+    program_li_show_dict = get_top_10_list()
     end_time = time.time()
     print 'time elapse is %s'%(end_time-start_time)
     return render(request,'channel.html',{'path':path,'vv_month_date':json.dumps(vv_month_date),'vv_month_lastyear':json.dumps(vv_month_lastyear),'channel_name_eng':channel_name_eng,
@@ -228,14 +264,15 @@ def channel(request):
                                           'vv_day_data': json.dumps(vv_day_data),'uv_day_data':json.dumps(uv_day_data),'vv_day_date':json.dumps(vv_day_date),
                                           'vv_terminal_day_dict': vv_terminal_day_dict,'uv_terminal_day_dict': uv_terminal_day_dict,
                                           'pid_day_avg_result': json.dumps(pid_day_avg_result),'pid_vv_change_dict':json.dumps(pid_vv_change_dict),
-                                          'program_li_show_dict':program_li_show_dict,})
+                                          'program_li_show_dict':program_li_show_dict,'authority':authority})
 
 ###节目模块
 def program(request):
+    authority = str(request.session['user_authority'])
     start_time = time.time()
     path = request.get_full_path()
-    program_id = request.GET.get('id')###获取url中传过来的参数
     if request.method == 'GET':
+        program_id = request.GET.get('id')  ###获取url中传过来的参数
         calculate_date = datetime.datetime.now() - datetime.timedelta(days=1)
     elif request.method == 'POST':
         post_date = request.POST.get('search_date')###获取post表单中的参数
@@ -264,10 +301,10 @@ def program(request):
     duration_isfull_day_sql = program_class.module_search(searchtype='program_duration_isfull_day')
     pt_type_day_sql = program_class.module_search(searchtype='program_pt_type_day')
     vid_isfull_day_sql = Newmofang(start_date=start_date, end_date=end_date,vid_str=vid_str).module_search(searchtype='program_vid_isfull_day')
-    ###节目模块li标签top10uv的合集
-    program_li_show_sql = program_class.module_search(searchtype='program_li_show')
+    # ###节目模块li标签top10uv的合集
+    # program_li_show_sql = program_class.module_search(searchtype='program_li_show')
     ###合并sql,一次查询
-    sql_combine = program_class.sql_union(vv_day_sql,uv_day_sql,uv_terminal_day_sql,duration_isfull_day_sql,pt_type_day_sql,vid_isfull_day_sql,program_li_show_sql)
+    sql_combine = program_class.sql_union(vv_day_sql,uv_day_sql,uv_terminal_day_sql,duration_isfull_day_sql,pt_type_day_sql,vid_isfull_day_sql)
     all_result = program_class.sql_query(sql_combine)
 
     ###利用pandas包把all_result分到不同的查询
@@ -277,23 +314,90 @@ def program(request):
     duration_isfull_day_result = all_result[all_result['module_name']=='program_duration_isfull_day'].sort(['col1'])
     pt_type_day_result = all_result[all_result['module_name'] == 'program_pt_type_day']
     vid_isfull_day_result = all_result[all_result['module_name'] == 'program_vid_isfull_day']
-    program_li_show_result = all_result[all_result['module_name'] == 'program_li_show']
+    # program_li_show_result = all_result[all_result['module_name'] == 'program_li_show']
 
     vv_day_date, vv_day_data, uv_day_data = vv_day_process(vv_day_result=vv_day_result,uv_day_result=uv_day_result)  ###全平台日vv、uv数据
     uv_terminal_day_dict = program_uv_terminal_day_process(uv_terminal_day_result=uv_terminal_day_result,terminal_list=terminal_list)  ###分端uv变化
     duration_isfull_day_dict = program_duration_isfull_day_process(duration_isfull_day_result)
     pt_type_day_dict = program_pt_type_day_process(pt_type_day_result)
     vid_isfull_day_dict = program_vid_isfull_day_process(vid_isfull_day_result,cms_result)
-    program_li_show_dict = program_li_show_process(program_li_show_result)  ###节目模块合集标签
+    ##调用方法获取本地数据库存储的top10节目列表
+    program_li_show_dict = get_top_10_list()
+    # program_li_show_dict = program_li_show_process(program_li_show_result)  ###节目模块合集标签
 
     end_time = time.time()
     print 'time elapse is %s'%(end_time-start_time)
     return render(request,'program.html',{'path':path,'vv_day_data': json.dumps(vv_day_data),'uv_day_data':json.dumps(uv_day_data),'vv_day_date':json.dumps(vv_day_date)
                                         ,'program_name':program_name,'uv_terminal_day_dict':uv_terminal_day_dict,'duration_isfull_day_dict':duration_isfull_day_dict,
                                           'vid_isfull_day_dict':json.dumps(vid_isfull_day_dict),'pt_type_day_dict':pt_type_day_dict,'end_date':end_date,
-                                          'program_li_show_dict':program_li_show_dict,'program_id':program_id},)
+                                          'program_li_show_dict':program_li_show_dict,'program_id':program_id,'authority':authority},)
 
 
 
 def testindex(request):
     return render(request,'index333.html')
+
+
+###搜索节目名,返回结果
+def Fsearch(request):
+    if request.method=='POST':
+        q=request.POST['search-text']
+        print  "q",q
+        conn = MySQLdb.connect(host="10.100.5.41", user="app_hefang", passwd="app_hefang1234", db="cms", charset="utf8")
+        rejson = []
+        ###如果输入关键词
+        if q !="" and q!=" ":
+            sql='select id ,title,productionyear from hunantv_v_collection where title like "%{name}%" order by productionyear desc limit 10 '.format(name=q)
+            ##没有输入关键词
+        else:
+            sql = 'select id ,title,productionyear from hunantv_v_collection  order by productionyear desc limit 10 '
+        recontents = pd.read_sql(sql,conn)
+        conn.close()
+        for index, row in recontents.iterrows():
+            rejson.append([row['id'], row['title']])
+        return HttpResponse(json.dumps(rejson), content_type='application/json')
+
+def getprogramid(request):
+    if request.method=='POST':
+        q=request.POST['search-text']
+        q = request.POST['search-text']
+        conn = MySQLdb.connect(host="10.100.5.41", user="app_hefang", passwd="app_hefang1234", db="cms", charset="utf8")
+        rejson = []
+        sql = 'select id,title  from hunantv_v_collection where title ="{name}"'.format( name=q)
+        recontents = pd.read_sql(sql, conn)
+        conn.close()
+        for index, row in recontents.iterrows():
+            rejson.append([row['id'],row['title']])
+        print rejson
+        return HttpResponse(json.dumps(rejson), content_type='application/json')
+###退出登录
+def logout(request):
+     if request.method=="GET":
+        try:
+            del request.session['user_authority']  ###设置session时间
+        except:
+            return HttpResponseRedirect("/display")
+     return HttpResponseRedirect("/display")
+
+def  get_top_10_list():
+    conn = MySQLdb.connect(host='10.100.3.64', user='hefang', passwd='NYH#dfjirD872C$d&ss', db='display', port=3306, charset='utf8')
+    cur = conn.cursor()
+    sql = "select programname as title ,programId as id from top_10_show"
+    program_list = pd.read_sql(sql, conn)
+    program_list_result = map(lambda x, y: {x: y}, program_list['title'], program_list['id'])  ###转化为列表
+    program_dict_result = reduce(lambda x, y: dict(x, **y), program_list_result)
+    return program_dict_result
+ # start_time = time.time()
+    # calculate_date = datetime.datetime.now() - datetime.timedelta(days=1)
+    # ###日期计算
+    # start_date, end_date, end_date_show, last_week_start_date, last_week_end_date, \
+    # last_2week_start_date, last_2week_end_date, month_to_month_date, year_to_year_date, date_str = date_calculate( calculate_date)
+    #
+    # ###初始化类
+    # platform_class = Newmofang(start_date=start_date, end_date=end_date, last_week_start_date=last_week_start_date,last_week_end_date=last_week_end_date)
+    # ###节目模块li标签top10uv的合集
+    # program_li_show_sql = platform_class.module_search(searchtype='program_li_show')
+    # top_10_list_result = Newmofang().sql_query(program_li_show_sql)
+    # program_li_show_dict = program_li_show_process(top_10_list_result)
+    # for key in program_li_show_dict:
+    #     print key,program_li_show_dict[key]

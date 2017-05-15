@@ -1,0 +1,5 @@
+.notclick
+{
+     pointer-events: none;
+      cursor: default;
+}

@@ -8,7 +8,8 @@ from SQLclass import *
 
 
 def date_calculate(calculate_date):
-    start_date = (calculate_date - datetime.timedelta(days=29)).date().strftime('%Y%m%d')  ###查询开始时间
+    start_date = '20170101'  ###查询开始时间
+    # start_date = (calculate_date - datetime.timedelta(days=29)).date().strftime('%Y%m%d')  ###查询开始时间
     end_date = calculate_date.date().strftime('%Y%m%d')  ###查询结束时间
 
     end_date_show = calculate_date.date().strftime('%Y.%m.%d')  ###在页面显示需要的数据格式
@@ -320,7 +321,7 @@ def dau_day_process(dau_platform_day_result,uv_day_result):
     ###数据汇总
     data_all = pd.merge(dau_result,uv_result)
     ###对应位置相除
-    data_all['uv_ration'] = map(lambda x,y:'%.2f'%round(x/y,2),data_all['uv'],data_all['dau'])
+    data_all['uv_ration'] = map(lambda x,y:'%.2f'%round(x/y*100,2),data_all['uv'],data_all['dau'])
     dau_list = data_all['dau'].tolist()
     ration_list = data_all['uv_ration'].tolist()
     return dau_list,ration_list

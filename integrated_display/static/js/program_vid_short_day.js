@@ -8,7 +8,8 @@
                     trigger: 'axis',
                     axisPointer : {            // 坐标轴指示器，坐标轴触发有效
                         type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
-                    }
+                    },
+                    formatter:'{c}万'
                 },
                 legend: {
                     data:['短片vv']
@@ -45,7 +46,8 @@
                         label: {
                             normal: {
                                 show: true,
-                                position: 'right'
+                                position: 'right',
+                                formatter:'{c}万'
                             }
                         },
                         data:vid_isfull_day_dict.short_num

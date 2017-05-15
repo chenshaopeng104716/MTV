@@ -19,6 +19,14 @@
                 saveAsImage: {}
               }
             },
+            dataZoom: [{
+                type: 'inside',
+                start: 70,
+                end: 100
+            }, {
+                start: 70,
+                end: 100,
+            }],
             xAxis: {
                 type : 'category',
                 boundaryGap : false,
@@ -29,6 +37,10 @@
             },
             yAxis: {
                 type : 'value',
+                axisLabel:{
+                formatter:function(value){
+                return value+'万'
+                }},
                 splitLine: {
                     show: false
                 }
@@ -37,6 +49,12 @@
                 name: 'vv',
                 type: 'line',
                 data: vv_day_data,
+                markPoint : {
+                    data : [
+                        {symbol:'pin',symbolSize:70,type : 'max', name: '最大值'},
+                        {symbol:'pin',symbolSize:70,type : 'min', name: '最小值'}
+                    ]
+                },
                 markLine : {
                     data : [
                         {type : 'average', name: '平均值'}
@@ -48,6 +66,12 @@
                 name: 'uv',
                 type: 'line',
                 data: uv_day_data,
+                markPoint : {
+                    data : [
+                        {symbol:'pin',symbolSize:70,type : 'max', name: '最大值'},
+                        {symbol:'pin',symbolSize:70,type : 'min', name: '最小值'}
+                    ]
+                },
                 markLine : {
                     data : [
                         {type : 'average', name: '平均值'}

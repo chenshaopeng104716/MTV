@@ -322,7 +322,7 @@ class Newmofang(object):
         return sql
 
     def program_vid_isfull_day(self,table):
-        sql = "(select date as col1,ltrim(vid) as col2,'null' as col3,'null' as col4,'null' as col5,sum(vv) as num,'program_vid_isfull_day' as module_name " \
+        sql = "(select date as col1,ltrim(vid) as col2,'null' as col3,'null' as col4,'null' as col5,round(sum(vv)/10000,1) as num,'program_vid_isfull_day' as module_name " \
               "from {table} where date>='{start_time}' and date<='{end_time}' and {bid_not_in} and vid in ({vid_str}) group by date,vid)".format(table=table,
                 start_time=self.end_date,end_time=self.end_date,bid_not_in=self.bid_not_in,vid_str=self.vid_str)
         return sql

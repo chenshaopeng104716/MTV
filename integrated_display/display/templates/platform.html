@@ -10,13 +10,28 @@
     <link href="{% static 'img/favicon.ico' %}" rel="shortcut icon" >
     <link href="{% static 'blue-moon/css/bootstrap.min.css' %}" rel="stylesheet">
     <link href="{% static 'blue-moon/css/new.css' %}" rel="stylesheet">
-
+    <link href="{% static 'css/new.css' %}" rel="stylesheet">
+    <link href="{% static 'css/toastr.css' %}" rel="stylesheet">
+    <link href="{% static 'css/authority_control.css' %}" rel="stylesheet">
     <!-- Datepicker CSS -->
     <link rel="stylesheet" type="text/css" href="{% static 'blue-moon/css/datepicker.css' %}">
-
     <link href="{% static 'blue-moon/fonts/font-awesome.min.css' %}" rel="stylesheet">
-
+      <script src="{% static 'js/jquery.js' %}"></script>
+      <script src="{% static 'js/bootstrap.min.js' %}"></script>
+      <script src="{% static 'js/jquery.scrollUp.js' %}"></script>
+      <script src="{% static 'js/main.js' %}"></script>
+      <!--权限提醒，权限控制，节目查询-->
+      <script src="{% static 'js/toastr.js' %}"></script>
+      <script src="{% static 'js/authority_control.js' %}"></script>
+      <script src="{% static 'js/query_program.js' %}"></script>
+       <script src="{% static 'js/base_loading.js' %}"></script>
     <!-- HTML5 shiv and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--<style type="text/css">-->
+        <!--.highlight_program {-->
+      <!--background-color: #5CB85C !important;;-->
+       <!--font-size: 30px !important;;-->
+     <!--}-->
+    <!--</style>-->
 
   </head>
 
@@ -26,7 +41,8 @@
     <header>
 
       <h2 style="color:#fff;width:600px;float:left;font-family: 'Microsoft YaHei';margin: 7px 0 0 0;line-height: 50px"><img src="{% static 'images/MTV.png' %}"/><span style="margin-left:5px;vertical-align: bottom">运营分析可视化平台(Beta)</span></h2>
-      
+       <a style="float:right;color: white;font-size: 20px;" href="/display/logout"><i class="glyphicon glyphicon-off"></i>退出</a>
+        <span style="float:right;color: white;font-size: 15px;">权限:{{authority}}&nbsp;&nbsp;&nbsp;&nbsp;</span>
     </header>
     <!-- Header End -->
 
@@ -38,28 +54,39 @@
         <div id='cssmenu'>
           <ul>
             <li class='active'>
-              <a href='/display/'>
+              <a  id="allplatform" href='/display/platform'>
                 <i class="fa fa-dashboard"></i>
                 <span >全平台</span>
               </a>
             </li>
-            <li>
+            <li id="channel_list">
               <a href="#">
                 <i class="fa fa-bar-chart-o"></i>频道</a>
               <ul>
-                 <li><a href="/display/channel?name=show">综艺</a></li>
-                 <li><a href="/display/channel?name=tv">电视剧</a></li>
-                 <li><a href="/display/channel?name=movie">电影</a></li>
-                 <li><a href="/display/channel?name=cartoon">动漫</a></li>
+                  <li><a  id="show" name="channel" href="/display/channel?name=show">综艺</a></li>
+                 <li><a  id="tv" name="channel" href="/display/channel?name=tv">电视剧</a></li>
+                 <li><a  id="movie" name="channel" href="/display/channel?name=movie">电影</a></li>
+                 <li><a  id="cartoon" name="channel" href="/display/channel?name=cartoon">动漫</a></li>
               </ul>
             </li>
             <li class=''>
               <a href='#'><i class="fa fa-caret-square-o-right"></i>
                 <!--<div class="mini-widget" data-tip='即将上线 敬请期待'>-->
                 节目
+
+
                 <!--</div>-->
               </a>
               <ul>
+                 <li id="search_result_location">
+                   <!--<form class="form-inline" action="/display/program?" >-->
+                  {% csrf_token %}
+                  <div class="form-group" id="search">
+                    <input type="text" autocomplete="off" class="form-control" id="search-text" placeholder="输入查找的节目">
+                  </div>
+
+                <!--</form>-->
+                 </li>
                 <!--<li><form class="form-inline">-->
                   <!--<div class="form-group">-->
                     <!--<input type="email" class="form-control" id="exampleInputEmail2" placeholder="输入查找节目">-->
@@ -67,7 +94,7 @@
                   <!--<button type="submit" class="btn btn-default">搜索</button>-->
                 <!--</form></li>-->
                 {% for key,value in program_li_show_dict.items %}
-                <li><a href='/display/program?id={{value}}'>{{key}}</a></li>
+                <li name="program_list_ago"><a href='/display/program?id={{value}}'>{{key}}</a></li>
                 {% endfor %}
                 <!--<li class="moreProgram">-->
                   <!--<a>更多</a>-->
@@ -76,6 +103,7 @@
             </li>
 
           </ul>
+
         </div>
 
         <!-- Top Nav End -->
@@ -99,7 +127,7 @@
                 </div>
 			
                 <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                  <form class="form-inline" action="/display/"  method="post" role="form">
+                  <form class="form-inline" action="/display/"  method="get" role="form">
                     {% csrf_token %}
                     <div class="form-group">
                       <label for="search_date" style="font-size: 14px">日期：</label>
@@ -419,9 +447,13 @@
         <footer>
           <div style="text-align:center"><p>© MGTV hf ltt</p></div>
         </footer>
-
-      </div>
-    </div>
+         </div>
+        <input type="hidden" id="authority" name="field＿name" value="{{authority}}">
+         </div>
+           <!--<canvas id="c"  style="display:block;margin:10% auto;"></canvas>-->
+           <!--<script src="{% static 'js/base_loading.js' %}"></script>-->
+           <!--<script src="{% static 'js/loading.js' %}"></script>-->
+          <!--<script src="{% static 'js/PrefixFree.js' %}"></script>-->
     <!-- Main Container end -->
       <script>
         //kpi
@@ -458,11 +490,6 @@
 
 
       </script>
-      <script src="{% static 'js/jquery.js' %}"></script>
-      <script src="{% static 'js/bootstrap.min.js' %}"></script>
-      <script src="{% static 'js/jquery.scrollUp.js' %}"></script>
-      <script src="{% static 'js/main.js' %}"></script>
-
       <!--ECharts -->
       <script src="{% static 'js/echarts.min.js' %}"></script>
       <script src="{% static 'js/firstMap.js' %}"></script>
@@ -474,12 +501,6 @@
       <script src="{% static 'js/platform_uv_channel_day.js' %}"></script>
       <script src="{% static 'js/platform_dau_day.js' %}"></script>
       <script src="{% static 'js/platform_vv_uv_program.js' %}"></script>
-
-
-
-
-
-
 
 
   </body>

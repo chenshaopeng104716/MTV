@@ -6,7 +6,8 @@
           // 指定图表的配置项和数据
           option = {
                     tooltip: {
-                      trigger: 'axis'
+                      trigger: 'axis',
+                      formatter:'{b0}<br>{a0}: {c0}万<br />{a1}: {c1}%',
                     },
                     legend: {
                       data:['DAU', 'UV占比']
@@ -18,11 +19,14 @@
                         saveAsImage: {}
                       }
                     },
-                    dataZoom: {
-                      show: false,
-                      start: 0,
-                      end: 100
-                    },
+                    dataZoom: [{
+                        type: 'inside',
+                        start: 70,
+                        end: 100
+                    }, {
+                        start: 70,
+                        end: 100,
+                    }],
                     xAxis: [
                       {
                         type: 'category',
@@ -40,6 +44,10 @@
                         name: 'DAU',
                         max: 4000,
                         min: 0,
+                        axisLabel:{
+                        formatter:function(value){
+                        return value+'万'
+                        }},
                         boundaryGap: [0.2, 0.2],
                         splitLine: {
                             show: false
@@ -49,8 +57,12 @@
                         type: 'value',
                         scale: true,
                         name: 'UV占比',
-                        max: 1,
+                        max: 100,
                         min: 0,
+                        axisLabel:{
+                        formatter:function(value){
+                        return value+'%'
+                        }},
                         boundaryGap: [0.2, 0.2],
                         splitLine: {
                             show: false
@@ -61,8 +73,13 @@
                       {
                         name:'DAU',
                         type:'bar',
-                        data:dau_day_data
-
+                        data:dau_day_data,
+                        markPoint : {
+                            data : [
+                                {symbol:'pin',symbolSize:70,type : 'max', name: '最大值'},
+                                {symbol:'pin',symbolSize:70,type : 'min', name: '最小值'}
+                            ]
+                        },
                       },
                       {
                         name:'UV占比',
@@ -74,8 +91,7 @@
                                 position: 'top'
                             }
                         },
-                        data:uv_ration_day_data
-
+                        data:uv_ration_day_data,
                       }
                     ]
                   };

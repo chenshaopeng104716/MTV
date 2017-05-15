@@ -12,7 +12,8 @@
                     text: ''
                 },
                 tooltip : {
-                    trigger: 'axis'
+                    trigger: 'axis',
+                    formatter:'{b0}<br>{a0}: {c0}万<br />{a1}: {c1}万<br />{a2}: {c2}万<br />{a3}: {c3}万<br />{a4}: {c4}万'
                 },
                 legend: {
                     data:terminal
@@ -24,12 +25,14 @@
                     saveAsImage: {}
                   }
                 },
-                grid: {
-                    left: '3%',
-                    right: '4%',
-                    bottom: '3%',
-                    containLabel: true
-                },
+                dataZoom: [{
+                    type: 'inside',
+                    start: 70,
+                    end: 100
+                }, {
+                    start: 70,
+                    end: 100,
+                }],
                 xAxis : [
                     {
                         type : 'category',
@@ -43,6 +46,10 @@
                 yAxis : [
                     {
                         type : 'value',
+                        axisLabel:{
+                        formatter:function(value){
+                        return value+'万'
+                        }},
                         splitLine: {
                             show: false
                         }

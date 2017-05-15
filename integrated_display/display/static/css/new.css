@@ -3222,3 +3222,7 @@ h4.panel-title {
       left: 0; } }
 .google-visualization-table-table {
   width: 100%; }
+
+  .highlight_program {
+      background-color: #5CB85C !important;;
+     }
